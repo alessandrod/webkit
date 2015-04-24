@@ -45,6 +45,7 @@ static void candidateGatheringDone(OwrSession*, MediaEndpointOwr*);
 static void gotDtlsCertificate(OwrSession*, GParamSpec*, MediaEndpointOwr*);
 static void gotSendSsrc(OwrMediaSession*, GParamSpec*, MediaEndpointOwr*);
 static void gotIncomingSource(OwrMediaSession*, OwrMediaSource*, MediaEndpointOwr*);
+static void gotDataChannel();
 
 static const char* iceCandidateTypes[] = { "host", "srflx", "relay", nullptr };
 
@@ -163,6 +164,16 @@ void MediaEndpointOwr::prepareMediaSession(OwrMediaSession* mediaSession, PeerMe
     g_signal_connect(mediaSession, "on-incoming-source", G_CALLBACK(gotIncomingSource), this);
 }
 
+void MediaEndpointOwr::prepareDataSession(OwrMediaSession* dataSession, PeerMediaDescription* mediaDescription)
+{
+    prepareSession(OWR_SESSION(dataSession), mediaDescription);
+  
+    g_object_set(dataSession, "sctp-local-port", mediaDescription->port(), nullptr);
+  
+    g_signal_connect(dataSession, "on-data-channel-requested", G_CALLBACK(gotDataChannel), this);
+
+}
+
 void MediaEndpointOwr::ensureTransportAgentAndSessions(bool isInitiator, const Vector<SessionConfig>& sessionConfigs)
 {
     if (!m_transportAgent) {
@@ -236,6 +247,10 @@ static void gotSendSsrc(OwrMediaSession* mediaSession, GParamSpec*, MediaEndpoin
 static void gotIncomingSource(OwrMediaSession*, OwrMediaSource*, MediaEndpointOwr*)
 {
     printf("-> gotIncomingSource\n");
+}
+
+static void gotDataChannel(){
+    printf("-> gotDataChannel\n");
 }
 
 } // namespace WebCore

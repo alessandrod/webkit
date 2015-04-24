@@ -35,6 +35,7 @@
 
 #include "MediaEndpoint.h"
 #include <owr/owr_media_session.h>
+#include <owr/owr_data_session.h>
 #include <owr/owr_transport_agent.h>
 
 namespace WebCore {
@@ -72,6 +73,7 @@ private:
 
     void prepareSession(OwrSession*, PeerMediaDescription*);
     void prepareMediaSession(OwrMediaSession*, PeerMediaDescription*, bool isInitiator);
+    void prepareDataSession(OwrDataSession*, PeerMediaDescription*);
 
     void ensureTransportAgentAndSessions(bool isInitiator, const Vector<SessionConfig>& sessionConfigs);
 
