@@ -64,7 +64,10 @@ public:
     void dispatchDtlsCertificate(unsigned sessionIndex, const String& certificate);
 
 private:
-    enum SessionType { SessionTypeMedia };
+    enum SessionType {
+        SessionTypeMedia = 1,
+        SessionTypeData = 2
+    };
 
     struct SessionConfig {
         SessionType type;

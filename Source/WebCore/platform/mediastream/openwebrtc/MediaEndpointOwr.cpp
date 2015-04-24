@@ -45,7 +45,7 @@ static void candidateGatheringDone(OwrSession*, MediaEndpointOwr*);
 static void gotDtlsCertificate(OwrSession*, GParamSpec*, MediaEndpointOwr*);
 static void gotSendSsrc(OwrMediaSession*, GParamSpec*, MediaEndpointOwr*);
 static void gotIncomingSource(OwrMediaSession*, OwrMediaSource*, MediaEndpointOwr*);
-static void gotDataChannel();
+static void dataChannelRequested();
 
 static const char* iceCandidateTypes[] = { "host", "srflx", "relay", nullptr };
 
@@ -81,7 +81,7 @@ void MediaEndpointOwr::prepareToReceive(MediaEndpointConfiguration* configuratio
     Vector<SessionConfig> sessionConfigs;
     for (unsigned i = m_sessions.size(); i < configuration->mediaDescriptions().size(); ++i) {
         SessionConfig config;
-        config.type = SessionTypeMedia;
+        config.type = configuration->mediaDescriptions()[i].type() == "data" ?SessionTypeData :SessionTypeMedia;
         config.isDtlsClient = configuration->mediaDescriptions()[i]->dtlsSetup() == "active";
         sessionConfigs.append(WTF::move(config));
     }
@@ -90,7 +90,11 @@ void MediaEndpointOwr::prepareToReceive(MediaEndpointConfiguration* configuratio
 
     // Prepare the new sessions.
     for (unsigned i = m_numberOfReceivePreparedSessions; i < m_sessions.size(); ++i) {
-        prepareMediaSession(OWR_MEDIA_SESSION(m_sessions[i]), configuration->mediaDescriptions()[i].get(), isInitiator);
+        if(configuration->mediaDescriptions()[i].type() == "data"){
+            prepareDataSession(OWR_DATA_SESSION(m_sessions[i]), configuration->mediaDescriptions()[i].get());
+        }else{
+            prepareMediaSession(OWR_MEDIA_SESSION(m_sessions[i]), configuration->mediaDescriptions()[i].get(), isInitiator);
+        }
         owr_transport_agent_add_session(m_transportAgent, m_sessions[i]);
     }
 
@@ -249,8 +253,8 @@ static void gotIncomingSource(OwrMediaSession*, OwrMediaSource*, MediaEndpointOw
     printf("-> gotIncomingSource\n");
 }
 
-static void gotDataChannel(){
-    printf("-> gotDataChannel\n");
+static void dataChannelRequested(){
+    printf("-> dataChannelRequested\n");
 }
 
 } // namespace WebCore
