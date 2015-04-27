@@ -191,8 +191,12 @@ void MediaEndpointOwr::ensureTransportAgentAndSessions(bool isInitiator, const V
 
     g_object_set(m_transportAgent, "ice-controlling-mode", isInitiator, nullptr);
 
-    for (auto& config : sessionConfigs)
-        m_sessions.append(OWR_SESSION(owr_media_session_new(config.isDtlsClient)));
+    for (auto& config : sessionConfigs) {
+        if (config.type == SessionTypeMedia) 
+	    m_sessions.append(OWR_SESSION(owr_media_session_new(config.isDtlsClient)));
+	else
+	    m_sessions.append(OWR_SESSION(owr_data_session_new(config.isDtlsClient)));   
+    }
 }
 
 static void gotCandidate(OwrSession* session, OwrCandidate* candidate, MediaEndpointOwr* mediaEndpoint)
