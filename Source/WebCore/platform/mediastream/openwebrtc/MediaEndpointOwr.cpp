@@ -81,7 +81,7 @@ void MediaEndpointOwr::prepareToReceive(MediaEndpointConfiguration* configuratio
     Vector<SessionConfig> sessionConfigs;
     for (unsigned i = m_sessions.size(); i < configuration->mediaDescriptions().size(); ++i) {
         SessionConfig config;
-        config.type = configuration->mediaDescriptions()[i].type() == "data" ?SessionTypeData :SessionTypeMedia;
+        config.type = configuration->mediaDescriptions()[i]->type() == "data" ?SessionTypeData :SessionTypeMedia;
         config.isDtlsClient = configuration->mediaDescriptions()[i]->dtlsSetup() == "active";
         sessionConfigs.append(WTF::move(config));
     }
@@ -90,11 +90,10 @@ void MediaEndpointOwr::prepareToReceive(MediaEndpointConfiguration* configuratio
 
     // Prepare the new sessions.
     for (unsigned i = m_numberOfReceivePreparedSessions; i < m_sessions.size(); ++i) {
-        if(configuration->mediaDescriptions()[i].type() == "data"){
+        if (configuration->mediaDescriptions()[i]->type() == "data") 
             prepareDataSession(OWR_DATA_SESSION(m_sessions[i]), configuration->mediaDescriptions()[i].get());
-        }else{
+        else
             prepareMediaSession(OWR_MEDIA_SESSION(m_sessions[i]), configuration->mediaDescriptions()[i].get(), isInitiator);
-        }
         owr_transport_agent_add_session(m_transportAgent, m_sessions[i]);
     }
 
@@ -168,13 +167,13 @@ void MediaEndpointOwr::prepareMediaSession(OwrMediaSession* mediaSession, PeerMe
     g_signal_connect(mediaSession, "on-incoming-source", G_CALLBACK(gotIncomingSource), this);
 }
 
-void MediaEndpointOwr::prepareDataSession(OwrMediaSession* dataSession, PeerMediaDescription* mediaDescription)
+void MediaEndpointOwr::prepareDataSession(OwrDataSession* dataSession, PeerMediaDescription* mediaDescription)
 {
     prepareSession(OWR_SESSION(dataSession), mediaDescription);
   
     g_object_set(dataSession, "sctp-local-port", mediaDescription->port(), nullptr);
   
-    g_signal_connect(dataSession, "on-data-channel-requested", G_CALLBACK(gotDataChannel), this);
+    g_signal_connect(dataSession, "on-data-channel-requested", G_CALLBACK(dataChannelRequested), this);
 
 }
 
@@ -253,7 +252,8 @@ static void gotIncomingSource(OwrMediaSession*, OwrMediaSource*, MediaEndpointOw
     printf("-> gotIncomingSource\n");
 }
 
-static void dataChannelRequested(){
+static void dataChannelRequested()
+{
     printf("-> dataChannelRequested\n");
 }
 
