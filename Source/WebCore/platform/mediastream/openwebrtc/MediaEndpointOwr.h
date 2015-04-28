@@ -55,7 +55,7 @@ public:
     virtual void prepareToSend(MediaEndpointConfiguration*, bool isInitiator) override;
 
     virtual void addRemoteCandidate(IceCandidate*) override;
-    virtual std::unique_ptr<RTCDataChannelHandler> createDataChannel(const String& label, const RTCDataChannelInit&) override;
+    virtual std::unique_ptr<RTCDataChannelHandler> createDataChannel(const String& label, const RTCDataChannelInit_Endpoint&) override;
     virtual void stop() override;
 
     unsigned sessionIndex(OwrSession*) const;

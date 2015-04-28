@@ -33,8 +33,8 @@
 #include "Event.h"
 #include "ExceptionCode.h"
 #include "MessageEvent.h"
+#include "MediaEndpoint.h"
 #include "RTCDataChannelHandler.h"
-#include "RTCPeerConnectionHandler.h"
 #include "ScriptExecutionContext.h"
 #include <runtime/ArrayBuffer.h>
 #include <runtime/ArrayBufferView.h>
@@ -54,9 +54,9 @@ static const AtomicString& arraybufferKeyword()
     return arraybuffer;
 }
 
-PassRefPtr<RTCDataChannel> RTCDataChannel::create(ScriptExecutionContext* context, RTCPeerConnectionHandler* peerConnectionHandler, const String& label, const Dictionary& options, ExceptionCode& ec)
+PassRefPtr<RTCDataChannel> RTCDataChannel::create(ScriptExecutionContext* context, MediaEndpoint* peerConnectionHandler, const String& label, const Dictionary& options, ExceptionCode& ec)
 {
-    RTCDataChannelInit initData;
+    RTCDataChannelInit_Endpoint initData;
     String maxRetransmitsStr;
     String maxRetransmitTimeStr;
     options.get("ordered", initData.ordered);
@@ -75,7 +75,8 @@ PassRefPtr<RTCDataChannel> RTCDataChannel::create(ScriptExecutionContext* contex
         return nullptr;
     }
 
-    std::unique_ptr<RTCDataChannelHandler> handler = peerConnectionHandler->createDataChannel(label, initData);
+    //std::unique_ptr<RTCDataChannelHandler> handler = peerConnectionHandler->createDataChannel(label, initData);
+    std::unique_ptr<RTCDataChannelHandler> handler = nullptr;
     if (!handler) {
         ec = NOT_SUPPORTED_ERR;
         return nullptr;

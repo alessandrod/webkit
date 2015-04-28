@@ -63,7 +63,7 @@ private:
     unsigned short id;*/
     String d_label;
     unsigned long d_bufferedAmount;
-    RTCDataChannelInit& initData;
+    RTCDataChannelInit_Endpoint& initData;
     
 
     RTCDataChannelHandlerClient* d_client;

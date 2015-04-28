@@ -45,14 +45,14 @@ static std::unique_ptr<RTCDataChannelHandler> createRTCDataChannelHandleOwr(RTCD
 
 CreateRTCDataChannelHandler RTCDataChannelHandler::create = createRTCDataChannelHandleOwr;
 
-RTCDataChannelHandleOwr::RTCDataChannelHandleOwr(RTCDataChannelHandlerClient* client, String label, RTCDataChannelInit& initData, OwrDataChannel channel)
+RTCDataChannelHandleOwr::RTCDataChannelHandleOwr(RTCDataChannelHandlerClient* client, String label, RTCDataChannelInit_Endpoint& initData, OwrDataChannel channel)
     : d_client(client)
     , label(label)
-    , ordered(initData->ordered)
-    , maxRetransmitTime(initData->maxRetransmitTime)
-    , maxRetransmits(initData->maxRetransmits)
-    , negotiated(initData->negotiated)
-    , id(initData->id)
+    , ordered(initData.ordered)
+    , maxRetransmitTime(initData.maxRetransmitTime)
+    , maxRetransmits(initData.maxRetransmits)
+    , negotiated(initData.negotiated)
+    , id(initData.id)
     , owrDataChannel(channel)
 {
     

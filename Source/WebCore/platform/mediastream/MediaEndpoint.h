@@ -46,9 +46,9 @@ class MediaEndpointConfiguration;
 class RealTimeMediaSource; // not implemented
 
 
-struct RTCDataChannelInit {
+struct RTCDataChannelInit_Endpoint {
 public:
-    RTCDataChannelInit()
+    RTCDataChannelInit_Endpoint()
         : ordered(true)
         , maxRetransmitTime(-1)
         , maxRetransmits(-1)
@@ -88,7 +88,7 @@ public:
 
     virtual void addRemoteCandidate(IceCandidate *) = 0;
 
-    virtual std::unique_ptr<RTCDataChannelHandler> createDataChannel(const String& label, const RTCDataChannelInit& initData) = 0;
+    virtual std::unique_ptr<RTCDataChannelHandler> createDataChannel(const String& label, const RTCDataChannelInit_Endpoint& initData) = 0;
 
     virtual void stop() = 0;
 };

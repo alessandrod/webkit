@@ -29,6 +29,7 @@
 
 #include "EventTarget.h"
 #include "RTCDataChannelHandlerClient.h"
+#include "MediaEndpoint.h"
 #include "ScriptWrappable.h"
 #include "Timer.h"
 #include <wtf/RefCounted.h>
@@ -43,12 +44,12 @@ namespace WebCore {
 class Blob;
 class Dictionary;
 class RTCDataChannelHandler;
-class RTCPeerConnectionHandler;
+//class RTCPeerConnectionHandler;
 
 class RTCDataChannel final : public RefCounted<RTCDataChannel>, public ScriptWrappable, public EventTargetWithInlineData, public RTCDataChannelHandlerClient {
 public:
     static PassRefPtr<RTCDataChannel> create(ScriptExecutionContext*, std::unique_ptr<RTCDataChannelHandler>);
-    static PassRefPtr<RTCDataChannel> create(ScriptExecutionContext*, RTCPeerConnectionHandler*, const String& , const Dictionary&, ExceptionCode&);
+    static PassRefPtr<RTCDataChannel> create(ScriptExecutionContext*, MediaEndpoint*, const String& , const Dictionary&, ExceptionCode&);
     ~RTCDataChannel();
 
     String label() const;

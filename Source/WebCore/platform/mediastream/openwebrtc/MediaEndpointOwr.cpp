@@ -123,7 +123,7 @@ void MediaEndpointOwr::addRemoteCandidate(IceCandidate* candidate)
 }
 
 
-std::unique_ptr<RTCDataChannelHandler> MediaEndpointOwr::createDataChannel(const String& label, const RTCDataChannelInit& initData)
+std::unique_ptr<RTCDataChannelHandler> MediaEndpointOwr::createDataChannel(const String& label, const RTCDataChannelInit_Endpoint& initData)
 {   
 /*
     OwrDataSession session = owr_data_session_new(initData.ordered, initData.maxRetransmitTime, initData.maxRetransmits, initData.protocol, initData.negotiated, initData.id, label);
