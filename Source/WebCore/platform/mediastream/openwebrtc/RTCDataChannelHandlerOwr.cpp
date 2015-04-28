@@ -31,88 +31,81 @@
 #include "config.h"
 
 #if ENABLE(MEDIA_STREAM)
-#include "RTCDataChannelOwr.h"
-#include "MediaEndPoint.h"
+#include "RTCDataChannelHandlerOwr.h"
+#include "MediaEndpoint.h"
 #include <wtf/text/CString.h>
 
 namespace WebCore {
 
 
-static std::unique_ptr<RTCDataChannelHandler> createRTCDataChannelHandleOwr(RTCDataChannelHandlerClient* client, const String& label, RTCDataChannelInit_Endpoint& initData, OwrDataChannel* channel)
+static std::unique_ptr<RTCDataChannelHandler> createRTCDataChannelHandlerOwr(RTCDataChannelHandlerClient* client, const String& label, RTCDataChannelInit_Endpoint& initData, OwrDataChannel* channel)
 {
-    return std::unique_ptr<RTCDataChannelHandler>(new RTCDataChannelHandleOwr(client, label, initData, channel));
+    return std::unique_ptr<RTCDataChannelHandler>(new RTCDataChannelHandlerOwr(client, label, initData, channel));
 }
 
-CreateRTCDataChannelHandler RTCDataChannelHandler::create = createRTCDataChannelHandleOwr;
+CreateRTCDataChannelHandler RTCDataChannelHandler::create = createRTCDataChannelHandlerOwr;
 
-RTCDataChannelHandleOwr::RTCDataChannelHandleOwr(RTCDataChannelHandlerClient* client, const String& label, RTCDataChannelInit_Endpoint& initData, OwrDataChannel* channel)
-    : d_client(client)
-    , label(label)
-    , ordered(initData.ordered)
-    , maxRetransmitTime(initData.maxRetransmitTime)
-    , maxRetransmits(initData.maxRetransmits)
-    , negotiated(initData.negotiated)
-    , id(initData.id)
+RTCDataChannelHandlerOwr::RTCDataChannelHandlerOwr(RTCDataChannelHandlerClient* client, const String& label, RTCDataChannelInit_Endpoint& initData, OwrDataChannel* channel)
+    : m_client(client)
+    , m_label(label)
+    , initData(initData)
     , owrDataChannel(channel)
 {
     
 }
 
-RTCDataChannelHandleOwr::~RTCDataChannelHandleOwr()
+RTCDataChannelHandlerOwr::~RTCDataChannelHandlerOwr()
 {
 }
 
-void RTCDataChannelHandleOwr::setClient(RTCDataChannelHandlerClient* client){
-    d_client = client;
+void RTCDataChannelHandlerOwr::setClient(RTCDataChannelHandlerClient* client){
+    m_client = client;
 };
 
-String RTCDataChannelHandleOwr::label(){
-    return label;
+String RTCDataChannelHandlerOwr::label(){
+    return m_label;
 };
 
-bool RTCDataChannelHandleOwr::ordered(){
+bool RTCDataChannelHandlerOwr::ordered(){
     return initData.ordered ;
 };
 
-unsigned short RTCDataChannelHandleOwr::maxRetransmitTime(){
+unsigned short RTCDataChannelHandlerOwr::maxRetransmitTime(){
     return initData.maxRetransmitTime; 
 };
 
-unsigned short RTCDataChannelHandleOwr::maxRetransmits(){
+unsigned short RTCDataChannelHandlerOwr::maxRetransmits(){
     return initData.maxRetransmits;
 };
 
-String RTCDataChannelHandleOwr::protocol(){
+String RTCDataChannelHandlerOwr::protocol(){
     return initData.protocol;
 };
 
-bool RTCDataChannelHandleOwr::negotiated(){
+bool RTCDataChannelHandlerOwr::negotiated(){
     return initData.negotiated; 
 };
 
-unsigned short RTCDataChannelHandleOwr::id(){
+unsigned short RTCDataChannelHandlerOwr::id(){
     return initData.id; 
 };
 
-unsigned long RTCDataChannelHandleOwr::bufferedAmount(){
-    return bufferedAmount;    
+unsigned long RTCDataChannelHandlerOwr::bufferedAmount(){
+    return m_bufferedAmount;    
 };
 
-OwrDataChannel RTCDataChannelHandleOwr::owrDataChannel(){
-    return owrDataChannel;
-};
 
-bool RTCDataChannelHandleOwr::sendStringData(const String&){
+bool RTCDataChannelHandlerOwr::sendStringData(const String&){
 
     
 };
 
-bool RTCDataChannelHandleOwr::sendRawData(const char*, size_t){
+bool RTCDataChannelHandlerOwr::sendRawData(const char*, size_t){
 
     
 };
 
-void RTCDataChannelHandleOwr::close(){
+void RTCDataChannelHandlerOwr::close(){
     
 };
 

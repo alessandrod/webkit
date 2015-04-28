@@ -22,22 +22,22 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RTCDataChannelHandleOwr_h
-#define RTCDataChannelHandleOwr_h
+#ifndef RTCDataChannelHandlerOwr_h
+#define RTCDataChannelHandlerOwr_h
 
 #if ENABLE(MEDIA_STREAM)
 
-#include "RTCDataChannelHandler.h"
 #include "MediaEndpoint.h"
 #include <owr/owr_data_channel.h>
 
 namespace WebCore {
 
 class RTCDataChannelHandlerClient;
-class RTCDataChannelHandleOwr : public RTCDataChannelHandler {
+
+class RTCDataChannelHandlerOwr : public RTCDataChannelHandler {
 public:
-    RTCDataChannelHandleOwr(RTCDataChannelHandlerClient*, const String&, RTCDataChannelInit_Endpoint&, OwrDataChannel*);
-    ~RTCDataChannelHandleOwr();
+    RTCDataChannelHandlerOwr(RTCDataChannelHandlerClient*, const String&, RTCDataChannelInit_Endpoint&, OwrDataChannel*);
+    ~RTCDataChannelHandlerOwr();
 
     virtual void setClient(RTCDataChannelHandlerClient*);
 
@@ -63,12 +63,12 @@ private:
     String protocol,
     bool negotiated,
     unsigned short id;*/
-    String d_label;
-    unsigned long d_bufferedAmount;
+    String m_label;
+    unsigned long m_bufferedAmount;
     RTCDataChannelInit_Endpoint& initData;
     
 
-    RTCDataChannelHandlerClient* d_client;
+    RTCDataChannelHandlerClient* m_client;
     OwrDataChannel* owrDataChannel;
 };
 
@@ -76,4 +76,4 @@ private:
 
 #endif // ENABLE(MEDIA_STREAM)
 
-#endif // RTCDataChannelHandleOwr_h
+#endif // RTCDataChannelHandlerOwr_h

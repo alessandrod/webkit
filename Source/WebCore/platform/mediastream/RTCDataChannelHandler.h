@@ -30,9 +30,11 @@
 
 #include "MediaEndpoint.h"
 #include <owr/owr_data_channel.h>
+#include <wtf/text/CString.h>
 #include <wtf/text/WTFString.h>
 
 namespace WebCore {
+struct RTCDataChannelInit_Endpoint;
 class RTCDataChannelHandler;
 class RTCDataChannelHandlerClient;
 

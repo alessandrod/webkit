@@ -31,7 +31,7 @@
 #include "config.h"
 
 #if ENABLE(MEDIA_STREAM)
-#include "RTCDataChannelHandleOwr.h"
+#include "RTCDataChannelHandlerOwr.h"
 #include "MediaEndpointOwr.h"
 #include "MediaEndpointConfiguration.h"
 #include "OpenWebRTCUtilities.h"
@@ -183,9 +183,10 @@ std::unique_ptr<RTCDataChannelHandler> MediaEndpointOwr::createDataChannel(RTCDa
     gchar* label_conversion = g_strdup(label.utf8().data());
     OwrDataChannel* channel = owr_data_channel_new(initData.ordered, initData.maxRetransmitTime, initData.maxRetransmits,protocol_conversion , initData.negotiated, initData.id, label_conversion);
     owr_data_session_add_data_channel(session, channel);
-   std::unique_ptr<WebCore::RTCDataChannelHandler> handler = RTCDataChannelHandler::create(client, label, initData, channel);
+    //std::unique_ptr<RTCDataChannelHandler> handler = std::unique_ptr<RTCDataChannelHandler>(new RTCDataChannelHandleOwr(client, label, initData, channel));
+    std::unique_ptr<RTCDataChannelHandler> handler = RTCDataChannelHandler::create(client, label, initData, channel);
 
-     return handler;
+    return handler;
     //return nullptr;
 
 
