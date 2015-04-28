@@ -66,7 +66,7 @@ class MediaEndpointClient {
 public:
     virtual void gotSendSSRC(unsigned mdescIndex, const String& ssrc, const String& cname) = 0;
     virtual void gotDtlsCertificate(unsigned mdescIndex, const String& certificate) = 0;
-    virtual void gotIceCandidate(unsigned mdescIndex, RefPtr<IceCandidate>&&) = 0;
+    virtual void gotIceCandidate(unsigned mdescIndex, RefPtr<IceCandidate>&&, const String& ufrag, const String& password) = 0;
     virtual void doneGatheringCandidates(unsigned mdescIndex) = 0;
     virtual void gotRemoteSource(unsigned mdescIndex, RefPtr<RealTimeMediaSource>&&) = 0;
 
@@ -86,7 +86,7 @@ public:
     virtual void prepareToReceive(MediaEndpointConfiguration*, bool isInitiator) = 0;
     virtual void prepareToSend(MediaEndpointConfiguration*, bool isInitiator) = 0;
 
-    virtual void addRemoteCandidate(IceCandidate *) = 0;
+    virtual void addRemoteCandidate(IceCandidate&, unsigned mdescIndex, const String& ufrag, const String& password) = 0;
 
     virtual std::unique_ptr<RTCDataChannelHandler> createDataChannel(const String& label, const RTCDataChannelInit_Endpoint& initData) = 0;
 

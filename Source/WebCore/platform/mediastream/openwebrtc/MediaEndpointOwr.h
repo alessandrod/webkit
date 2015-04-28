@@ -54,15 +54,18 @@ public:
     virtual void prepareToReceive(MediaEndpointConfiguration*, bool isInitiator) override;
     virtual void prepareToSend(MediaEndpointConfiguration*, bool isInitiator) override;
 
-    virtual void addRemoteCandidate(IceCandidate*) override;
+    virtual void addRemoteCandidate(IceCandidate&, unsigned mdescIndex, const String& ufrag, const String& password) override;
+    
     virtual std::unique_ptr<RTCDataChannelHandler> createDataChannel(const String& label, const RTCDataChannelInit_Endpoint&) override;
+    
     virtual void stop() override;
 
     unsigned sessionIndex(OwrSession*) const;
 
-    void dispatchNewIceCandidate(unsigned sessionIndex, RefPtr<IceCandidate>&&);
+    void dispatchNewIceCandidate(unsigned sessionIndex, RefPtr<IceCandidate>&&, const String& ufrag, const String& password);
     void dispatchGatheringDone(unsigned sessionIndex);
     void dispatchDtlsCertificate(unsigned sessionIndex, const String& certificate);
+    void dispatchSendSSRC(unsigned sessionIndex, const String& ssrc, const String& cname);
 
 private:
     enum SessionType {
@@ -80,6 +83,7 @@ private:
     void prepareDataSession(OwrDataSession*, PeerMediaDescription*);
 
     void ensureTransportAgentAndSessions(bool isInitiator, const Vector<SessionConfig>& sessionConfigs);
+    void internalAddRemoteCandidate(OwrSession*, IceCandidate&, const String& ufrag, const String& password);
 
 
 
