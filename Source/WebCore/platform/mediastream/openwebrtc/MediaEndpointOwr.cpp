@@ -31,8 +31,8 @@
 #include "config.h"
 
 #if ENABLE(MEDIA_STREAM)
+#include "RTCDataChannelHandleOwr.h"
 #include "MediaEndpointOwr.h"
-
 #include "MediaEndpointConfiguration.h"
 #include "OpenWebRTCUtilities.h"
 #include <owr/owr.h>
@@ -123,6 +123,20 @@ void MediaEndpointOwr::addRemoteCandidate(IceCandidate* candidate)
     printf("MediaEndpointOwr::addRemoteCandidate: created candidate: %p\n", remoteCandidate);
 }
 
+
+std::unique_ptr<RTCDataChannelHandler> MediaEndpointOwr::createDataChannel(const String& label, const RTCDataChannelInit& initData)
+{   
+/*
+    OwrDataSession session = owr_data_session_new(initData.ordered, initData.maxRetransmitTime, initData.maxRetransmits, initData.protocol, initData.negotiated, initData.id, label);
+    OwrDataChannel channel = owr_data_channel_new(initData.ordered, initData.maxRetransmitTime, initData.maxRetransmits, initData.protocol, initData.negotiated, initData.id, label);
+    owr_data_session_add_data_channel(session, channel);
+     RTCDataChannelHandler handler = RTCDataChannelHandleOwr::create(nullptr, label, RTCDataChannelInit& initData, channel);
+
+     return handler;*/
+    return nullptr;
+
+
+}
 void MediaEndpointOwr::stop()
 {
     printf("MediaEndpointOwr::stop\n");

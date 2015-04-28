@@ -37,6 +37,7 @@
 #include <owr/owr_media_session.h>
 #include <owr/owr_data_session.h>
 #include <owr/owr_transport_agent.h>
+#include <owr/owr_data_channel.h>
 
 namespace WebCore {
 
@@ -54,7 +55,7 @@ public:
     virtual void prepareToSend(MediaEndpointConfiguration*, bool isInitiator) override;
 
     virtual void addRemoteCandidate(IceCandidate*) override;
-
+    virtual std::unique_ptr<RTCDataChannelHandler> createDataChannel(const String& label, const RTCDataChannelInit&) override;
     virtual void stop() override;
 
     unsigned sessionIndex(OwrSession*) const;
@@ -79,6 +80,9 @@ private:
     void prepareDataSession(OwrDataSession*, PeerMediaDescription*);
 
     void ensureTransportAgentAndSessions(bool isInitiator, const Vector<SessionConfig>& sessionConfigs);
+
+
+
 
     RefPtr<MediaEndpointInit> m_configuration;
 

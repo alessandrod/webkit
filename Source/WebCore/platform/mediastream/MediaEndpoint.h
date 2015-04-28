@@ -35,6 +35,7 @@
 
 // #include "RTCConfigurationPrivate.h"
 #include "MediaEndpointInit.h"
+#include "RTCDataChannelHandler.h"
 #include <wtf/text/WTFString.h>
 
 namespace WebCore {
@@ -43,6 +44,23 @@ class IceCandidate;
 class MediaEndpoint;
 class MediaEndpointConfiguration;
 class RealTimeMediaSource; // not implemented
+
+
+struct RTCDataChannelInit {
+public:
+    RTCDataChannelInit()
+        : ordered(true)
+        , maxRetransmitTime(-1)
+        , maxRetransmits(-1)
+        , negotiated(false)
+        , id(-1) { }
+    bool ordered;
+    int maxRetransmitTime;
+    int maxRetransmits;
+    String protocol;
+    bool negotiated;
+    int id;
+};
 
 class MediaEndpointClient {
 public:
@@ -69,6 +87,8 @@ public:
     virtual void prepareToSend(MediaEndpointConfiguration*, bool isInitiator) = 0;
 
     virtual void addRemoteCandidate(IceCandidate *) = 0;
+
+    virtual std::unique_ptr<RTCDataChannelHandler> createDataChannel(const String& label, const RTCDataChannelInit& initData) = 0;
 
     virtual void stop() = 0;
 };
