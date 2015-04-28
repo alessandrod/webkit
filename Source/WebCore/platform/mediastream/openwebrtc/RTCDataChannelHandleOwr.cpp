@@ -38,14 +38,14 @@
 namespace WebCore {
 
 
-static std::unique_ptr<RTCDataChannelHandler> createRTCDataChannelHandleOwr(RTCDataChannelHandlerClient* client, String label)
+static std::unique_ptr<RTCDataChannelHandler> createRTCDataChannelHandleOwr(RTCDataChannelHandlerClient* client, const String& label, RTCDataChannelInit_Endpoint& initData, OwrDataChannel* channel)
 {
-    return std::unique_ptr<RTCDataChannelHandler>(new RTCDataChannelHandleOwr(client, label));
+    return std::unique_ptr<RTCDataChannelHandler>(new RTCDataChannelHandleOwr(client, label, initData, channel));
 }
 
 CreateRTCDataChannelHandler RTCDataChannelHandler::create = createRTCDataChannelHandleOwr;
 
-RTCDataChannelHandleOwr::RTCDataChannelHandleOwr(RTCDataChannelHandlerClient* client, String label, RTCDataChannelInit_Endpoint& initData, OwrDataChannel channel)
+RTCDataChannelHandleOwr::RTCDataChannelHandleOwr(RTCDataChannelHandlerClient* client, const String& label, RTCDataChannelInit_Endpoint& initData, OwrDataChannel* channel)
     : d_client(client)
     , label(label)
     , ordered(initData.ordered)

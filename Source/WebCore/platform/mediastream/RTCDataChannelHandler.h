@@ -27,14 +27,20 @@
 
 #if ENABLE(MEDIA_STREAM)
 
+
+#include "MediaEndpoint.h"
+#include <owr/owr_data_channel.h>
 #include <wtf/text/WTFString.h>
 
 namespace WebCore {
-
+class RTCDataChannelHandler;
 class RTCDataChannelHandlerClient;
+
+typedef std::unique_ptr<RTCDataChannelHandler> (*CreateRTCDataChannelHandler)(RTCDataChannelHandlerClient*, const String&, RTCDataChannelInit_Endpoint&, OwrDataChannel*);
 
 class RTCDataChannelHandler {
 public:
+    WEBCORE_EXPORT static CreateRTCDataChannelHandler create;
     virtual ~RTCDataChannelHandler() { }
 
     virtual void setClient(RTCDataChannelHandlerClient*) = 0;

@@ -39,8 +39,11 @@
 #include <owr/owr.h>
 #include <owr/owr_audio_payload.h>
 #include <owr/owr_video_payload.h>
+#include "ConvertToUTF8String.h"
 #include <wtf/text/CString.h>
+#include <wtf/text/WTFString.h>
 
+#include <glib.h>
 namespace WebCore {
 
 static void gotCandidate(OwrSession*, OwrCandidate*, MediaEndpointOwr*);
@@ -172,16 +175,18 @@ void MediaEndpointOwr::addRemoteCandidate(IceCandidate& candidate, unsigned mdes
 }
 
 
-std::unique_ptr<RTCDataChannelHandler> MediaEndpointOwr::createDataChannel(const String& label, const RTCDataChannelInit_Endpoint& initData)
+std::unique_ptr<RTCDataChannelHandler> MediaEndpointOwr::createDataChannel(RTCDataChannelHandlerClient* client, const String& label, RTCDataChannelInit_Endpoint& initData)
 {   
-/*
-    OwrDataSession session = owr_data_session_new(initData.ordered, initData.maxRetransmitTime, initData.maxRetransmits, initData.protocol, initData.negotiated, initData.id, label);
-    OwrDataChannel channel = owr_data_channel_new(initData.ordered, initData.maxRetransmitTime, initData.maxRetransmits, initData.protocol, initData.negotiated, initData.id, label);
-    owr_data_session_add_data_channel(session, channel);
-     RTCDataChannelHandler handler = RTCDataChannelHandleOwr::create(nullptr, label, RTCDataChannelInit& initData, channel);
 
-     return handler;*/
-    return nullptr;
+    OwrDataSession* session = owr_data_session_new(true);
+    gchar* protocol_conversion = g_strdup(initData.protocol.utf8().data());
+    gchar* label_conversion = g_strdup(label.utf8().data());
+    OwrDataChannel* channel = owr_data_channel_new(initData.ordered, initData.maxRetransmitTime, initData.maxRetransmits,protocol_conversion , initData.negotiated, initData.id, label_conversion);
+    owr_data_session_add_data_channel(session, channel);
+   std::unique_ptr<WebCore::RTCDataChannelHandler> handler = RTCDataChannelHandler::create(client, label, initData, channel);
+
+     return handler;
+    //return nullptr;
 
 
 }

@@ -33,9 +33,11 @@
 
 namespace WebCore {
 
+class RTCDataChannelHandlerClient;
 class RTCDataChannelHandleOwr : public RTCDataChannelHandler {
 public:
-    virtual ~RTCDataChannelHandleOwr();
+    RTCDataChannelHandleOwr(RTCDataChannelHandlerClient*, const String&, RTCDataChannelInit_Endpoint&, OwrDataChannel*);
+    ~RTCDataChannelHandleOwr();
 
     virtual void setClient(RTCDataChannelHandlerClient*);
 
@@ -67,7 +69,7 @@ private:
     
 
     RTCDataChannelHandlerClient* d_client;
-    OwrDataChannel owrDataChannel;
+    OwrDataChannel* owrDataChannel;
 };
 
 } // namespace WebCore

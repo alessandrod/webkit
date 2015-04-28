@@ -43,6 +43,7 @@ namespace WebCore {
 
 class PeerMediaDescription;
 class RTCConfigurationPrivate;
+class RTCDataChannelHandlerClient;
 
 class MediaEndpointOwr : public MediaEndpoint {
 public:
@@ -56,7 +57,7 @@ public:
 
     virtual void addRemoteCandidate(IceCandidate&, unsigned mdescIndex, const String& ufrag, const String& password) override;
     
-    virtual std::unique_ptr<RTCDataChannelHandler> createDataChannel(const String& label, const RTCDataChannelInit_Endpoint&) override;
+    virtual std::unique_ptr<RTCDataChannelHandler> createDataChannel(RTCDataChannelHandlerClient* client, const String& label, RTCDataChannelInit_Endpoint&) override;
     
     virtual void stop() override;
 
