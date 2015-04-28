@@ -35,6 +35,7 @@
 
 #include "IceCandidate.h"
 #include "MediaPayload.h"
+#include "RealtimeMediaSource.h"
 #include <wtf/RefCounted.h>
 #include <wtf/Vector.h>
 
@@ -78,6 +79,12 @@ public:
     const String& dtlsFingerprint() const { return m_dtlsFingerprint; }
     void setDtlsFingerprint(const String& dtlsFingerprint) { m_dtlsFingerprint = dtlsFingerprint; }
 
+    const String& cname() const { return m_cname; }
+    void setCname(const String& cname) { m_cname = cname; }
+
+    const Vector<String>& ssrcs() const { return m_ssrcs; }
+    void addSsrc(const String& ssrc) { m_ssrcs.append(ssrc); }
+
     const String& iceUfrag() const { return m_iceUfrag; }
     void setIceUfrag(const String& iceUfrag) { m_iceUfrag = iceUfrag; }
 
@@ -87,8 +94,19 @@ public:
     const Vector<RefPtr<IceCandidate>>& iceCandidates() const { return m_iceCandidates; }
     void addIceCandidate(RefPtr<IceCandidate>&& candidate) { m_iceCandidates.append(WTF::move(candidate)); }
 
+    bool iceCandidateGatheringDone() const { return m_iceCandidateGatheringDone; }
+    void setIceCandidateGatheringDone(bool iceCandidateGatheringDone) { m_iceCandidateGatheringDone = iceCandidateGatheringDone; }
+
+    RealtimeMediaSource* source() const { return m_source.get(); }
+    void setSource(RefPtr<RealtimeMediaSource>&& source) { m_source = source; }
+
 private:
-    PeerMediaDescription() { }
+    PeerMediaDescription()
+        : m_port(0)
+        , m_rtcpMux(false)
+        , m_iceCandidateGatheringDone(false)
+        , m_source(nullptr)
+    { }
 
     String m_type;
     unsigned short m_port;
@@ -105,9 +123,15 @@ private:
     String m_dtlsFingerprintHashFunction;
     String m_dtlsFingerprint;
 
+    Vector<String> m_ssrcs;
+    String m_cname;
+
     String m_iceUfrag;
     String m_icePassword;
     Vector<RefPtr<IceCandidate>> m_iceCandidates;
+    bool m_iceCandidateGatheringDone;
+
+    RefPtr<RealtimeMediaSource> m_source;
 };
 
 } // namespace WebCore

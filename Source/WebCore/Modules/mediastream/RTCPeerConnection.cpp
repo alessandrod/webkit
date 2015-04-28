@@ -94,6 +94,7 @@ RTCPeerConnection::RTCPeerConnection(ScriptExecutionContext& context, PassRefPtr
     , m_signalingState(SignalingStateStable)
     , m_iceGatheringState(IceGatheringStateNew)
     , m_iceConnectionState(IceConnectionStateNew)
+    , m_resolveSetLocalDescription(nullptr)
     , m_scheduledEventTimer(*this, &RTCPeerConnection::scheduledEventTimerFired)
     , m_configuration(configuration)
     , m_stopped(false)
@@ -316,7 +317,7 @@ void RTCPeerConnection::setLocalDescription(RTCSessionDescription* description, 
     bool isInitiator = descriptionType == DescriptionTypeOffer;
 
     RefPtr<RTCPeerConnection> protectedThis(this);
-    m_completeSetLocalDescription = [targetState, resolveCallback, protectedThis]() mutable {
+    m_resolveSetLocalDescription = [targetState, resolveCallback, protectedThis]() mutable {
         protectedThis->m_signalingState = targetState;
         resolveCallback();
     };
@@ -386,25 +387,48 @@ void RTCPeerConnection::updateIce(const Dictionary& rtcConfiguration, ExceptionC
     m_mediaEndpoint->setConfiguration(createMediaEndpointInit(*m_configuration));
 }
 
-void RTCPeerConnection::addIceCandidate(RTCIceCandidate* iceCandidate, VoidResolveCallback resolveCallback, RejectCallback rejectCallback, ExceptionCode& ec)
+void RTCPeerConnection::addIceCandidate(RTCIceCandidate* rtcCandidate, VoidResolveCallback resolveCallback, RejectCallback rejectCallback, ExceptionCode& ec)
 {
     if (m_signalingState == SignalingStateClosed) {
         ec = INVALID_STATE_ERR;
         return;
     }
 
-    RefPtr<IceCandidate> candidate = MediaEndpointConfigurationConversions::iceCandidateFromJSON(iceCandidate->candidate());
-    if (!candidate) {
-        rejectCallback(DOMError::create("FIXME: bad candidate"));
+    if (!m_remoteConfiguration) {
+        callOnMainThread([rejectCallback] {
+            // FIXME: Error type?
+            RefPtr<DOMError> error = DOMError::create("InvalidStateError (no remote description)");
+            rejectCallback(error.get());
+        });
         return;
     }
 
-    printf("RTCPeerConnection::addIceCandidate: candidate: type %s, foundation: %s, componentId: %d, transport: %s\n",
-        candidate->type().ascii().data(), candidate->foundation().ascii().data(), candidate->componentId(), candidate->transport().ascii().data());
+    RefPtr<IceCandidate> candidate = MediaEndpointConfigurationConversions::iceCandidateFromJSON(rtcCandidate->candidate());
+    if (!candidate) {
+        callOnMainThread([rejectCallback] {
+            // FIXME: Error type?
+            RefPtr<DOMError> error = DOMError::create("SyntaxError (malformed candidate)");
+            rejectCallback(error.get());
+        });
+        return;
+    }
 
-    m_mediaEndpoint->addRemoteCandidate(candidate.get());
+    unsigned mdescIndex = rtcCandidate->sdpMLineIndex();
+    if (mdescIndex >= m_remoteConfiguration->mediaDescriptions().size()) {
+        callOnMainThread([rejectCallback] {
+            // FIXME: Error type?
+            RefPtr<DOMError> error = DOMError::create("InvalidSdpMlineIndex (sdpMLineIndex out of range");
+            rejectCallback(error.get());
+        });
+        return;
+    }
 
-    resolveCallback();
+    PeerMediaDescription& mdesc = *m_remoteConfiguration->mediaDescriptions()[mdescIndex];
+    mdesc.addIceCandidate(candidate.copyRef());
+
+    m_mediaEndpoint->addRemoteCandidate(*candidate, mdescIndex, mdesc.iceUfrag(), mdesc.icePassword());
+
+    callOnMainThread(resolveCallback);
 }
 
 String RTCPeerConnection::signalingState() const
@@ -497,8 +521,14 @@ void RTCPeerConnection::close()
     m_signalingState = SignalingStateClosed;
 }
 
-void RTCPeerConnection::gotSendSSRC(unsigned, const String&, const String&)
+void RTCPeerConnection::gotSendSSRC(unsigned mdescIndex, const String& ssrc, const String& cname)
 {
+    printf("-> gotSendSSRC()\n");
+
+    m_localConfiguration->mediaDescriptions()[mdescIndex]->addSsrc(ssrc);
+    m_localConfiguration->mediaDescriptions()[mdescIndex]->setCname(cname);
+
+    maybeResolveSetLocalDescription();
 }
 
 void RTCPeerConnection::gotDtlsCertificate(unsigned mdescIndex, const String& certificate)
@@ -537,30 +567,44 @@ void RTCPeerConnection::gotDtlsCertificate(unsigned mdescIndex, const String& ce
     m_localConfiguration->mediaDescriptions()[mdescIndex]->setDtlsFingerprintHashFunction("sha256");
     m_localConfiguration->mediaDescriptions()[mdescIndex]->setDtlsFingerprint(fingerprint.toString());
 
-    // FIXME: Temporary solution
-    m_completeSetLocalDescription();
+    if (maybeResolveSetLocalDescription() == SetLocalDescriptionResolvedSuccessfully)
+        maybeDispatchGatheringDone();
 }
 
-void RTCPeerConnection::gotIceCandidate(unsigned mdescIndex, RefPtr<IceCandidate>&& candidate)
+void RTCPeerConnection::gotIceCandidate(unsigned mdescIndex, RefPtr<IceCandidate>&& candidate, const String& ufrag, const String& password)
 {
-    printf("-> RTCPeerConnection::gotIceCandidate\n");
-    printf("is context thread: %d\n", scriptExecutionContext()->isContextThread());
+    printf("-> gotIceCandidate()\n");
 
     ASSERT(scriptExecutionContext()->isContextThread());
 
-    String candidateString = MediaEndpointConfigurationConversions::iceCandidateToJSON(candidate.get());
-    RefPtr<RTCIceCandidate> iceCandidate = RTCIceCandidate::create(candidateString, "", mdescIndex);
-    scheduleDispatchEvent(RTCIceCandidateEvent::create(false, false, WTF::move(iceCandidate)));
+    PeerMediaDescription& mdesc = *m_localConfiguration->mediaDescriptions()[mdescIndex];
+    if (mdesc.iceUfrag().isEmpty()) {
+        mdesc.setIceUfrag(ufrag);
+        mdesc.setIcePassword(password);
+    }
+
+    mdesc.addIceCandidate(candidate.copyRef());
+
+    // FIXME: update mdesc address (ideally with active candidate)
+
+    ResolveSetLocalDescriptionResult result = maybeResolveSetLocalDescription();
+    if (result == SetLocalDescriptionResolvedSuccessfully)
+        maybeDispatchGatheringDone();
+    else if (result == SetLocalDescriptionAlreadyResolved) {
+        String candidateString = MediaEndpointConfigurationConversions::iceCandidateToJSON(candidate.get());
+        RefPtr<RTCIceCandidate> iceCandidate = RTCIceCandidate::create(candidateString, "", mdescIndex);
+        scheduleDispatchEvent(RTCIceCandidateEvent::create(false, false, WTF::move(iceCandidate)));
+    }
 }
 
-void RTCPeerConnection::doneGatheringCandidates(unsigned)
+void RTCPeerConnection::doneGatheringCandidates(unsigned mdescIndex)
 {
-    printf("-> RTCPeerConnection::doneGatheringCandidates\n");
-    printf("is context thread: %d\n", scriptExecutionContext()->isContextThread());
+    printf("-> doneGatheringCandidates()\n");
 
     ASSERT(scriptExecutionContext()->isContextThread());
 
-    scheduleDispatchEvent(RTCIceCandidateEvent::create(false, false, 0));
+    m_localConfiguration->mediaDescriptions()[mdescIndex]->setIceCandidateGatheringDone(true);
+    maybeDispatchGatheringDone();
 }
 
 void RTCPeerConnection::gotRemoteSource(unsigned, RefPtr<RealTimeMediaSource>&&)
@@ -614,6 +658,49 @@ RTCPeerConnection::DescriptionType RTCPeerConnection::parseDescriptionType(const
 
     ASSERT(typeName == "answer");
     return DescriptionTypeAnswer;
+}
+
+bool RTCPeerConnection::isLocalConfigurationComplete() const
+{
+    for (auto& mdesc : m_localConfiguration->mediaDescriptions()) {
+        if (mdesc->dtlsFingerprint().isEmpty() || mdesc->iceUfrag().isEmpty())
+            return false;
+        if (mdesc->type() == "audio" || mdesc->type() == "video") {
+            if (!mdesc->ssrcs().size() || mdesc->cname().isEmpty())
+                return false;
+        }
+    }
+
+    return true;
+}
+
+RTCPeerConnection::ResolveSetLocalDescriptionResult RTCPeerConnection::maybeResolveSetLocalDescription()
+{
+    if (!m_resolveSetLocalDescription) {
+        ASSERT(isLocalConfigurationComplete());
+        return SetLocalDescriptionAlreadyResolved;
+    }
+
+    if (isLocalConfigurationComplete()) {
+        m_resolveSetLocalDescription();
+        m_resolveSetLocalDescription = nullptr;
+        return SetLocalDescriptionResolvedSuccessfully;
+    }
+
+    return LocalConfigurationIncomplete;
+}
+
+void RTCPeerConnection::maybeDispatchGatheringDone()
+{
+    if (!isLocalConfigurationComplete())
+        return;
+
+    for (auto& mdesc : m_localConfiguration->mediaDescriptions()) {
+        if (!mdesc->iceCandidateGatheringDone())
+            return;
+    }
+
+    scheduleDispatchEvent(RTCIceCandidateEvent::create(false, false, nullptr));
 }
 
 const char* RTCPeerConnection::activeDOMObjectName() const

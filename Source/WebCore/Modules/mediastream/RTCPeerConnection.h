@@ -101,7 +101,7 @@ public:
     // MediaEndpointClient
     virtual void gotSendSSRC(unsigned mdescIndex, const String& ssrc, const String& cname) override;
     virtual void gotDtlsCertificate(unsigned mdescIndex, const String& certificate) override;
-    virtual void gotIceCandidate(unsigned mdescIndex, RefPtr<IceCandidate>&&) override;
+    virtual void gotIceCandidate(unsigned mdescIndex, RefPtr<IceCandidate>&&, const String& ufrag, const String& password) override;
     virtual void doneGatheringCandidates(unsigned mdescIndex) override;
     virtual void gotRemoteSource(unsigned mdescIndex, RefPtr<RealTimeMediaSource>&&) override;
 
@@ -155,6 +155,16 @@ private:
     SignalingState targetSignalingState(SetterType, DescriptionType) const;
     DescriptionType parseDescriptionType(const String& typeName) const;
 
+    enum ResolveSetLocalDescriptionResult {
+        LocalConfigurationIncomplete,
+        SetLocalDescriptionResolvedSuccessfully,
+        SetLocalDescriptionAlreadyResolved
+    };
+
+    bool isLocalConfigurationComplete() const;
+    ResolveSetLocalDescriptionResult maybeResolveSetLocalDescription();
+    void maybeDispatchGatheringDone();
+
     void scheduleDispatchEvent(PassRefPtr<Event>);
     void scheduledEventTimerFired();
 
@@ -184,7 +194,7 @@ private:
     String m_localConfigurationType;
     String m_remoteConfigurationType;
 
-    std::function<void()> m_completeSetLocalDescription;
+    std::function<void()> m_resolveSetLocalDescription;
 
     Vector<RefPtr<RTCDataChannel>> m_dataChannels;
 
