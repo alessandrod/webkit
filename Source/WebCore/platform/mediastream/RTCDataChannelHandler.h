@@ -38,7 +38,7 @@ struct RTCDataChannelInit_Endpoint;
 class RTCDataChannelHandler;
 class RTCDataChannelHandlerClient;
 
-typedef std::unique_ptr<RTCDataChannelHandler> (*CreateRTCDataChannelHandler)(RTCDataChannelHandlerClient*, const String&, RTCDataChannelInit_Endpoint&, OwrDataChannel*);
+typedef std::unique_ptr<RTCDataChannelHandler> (*CreateRTCDataChannelHandler)(const String&, RTCDataChannelInit_Endpoint&, OwrDataChannel*);
 
 class RTCDataChannelHandler {
 public:

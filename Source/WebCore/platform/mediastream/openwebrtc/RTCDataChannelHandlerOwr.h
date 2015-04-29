@@ -36,7 +36,7 @@ class RTCDataChannelHandlerClient;
 
 class RTCDataChannelHandlerOwr : public RTCDataChannelHandler {
 public:
-    RTCDataChannelHandlerOwr(RTCDataChannelHandlerClient*, const String&, RTCDataChannelInit_Endpoint&, OwrDataChannel*);
+    RTCDataChannelHandlerOwr(const String&, RTCDataChannelInit_Endpoint&, OwrDataChannel*);
     ~RTCDataChannelHandlerOwr();
 
     virtual void setClient(RTCDataChannelHandlerClient*);

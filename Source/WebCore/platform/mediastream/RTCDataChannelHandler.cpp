@@ -9,7 +9,7 @@
 
 namespace WebCore {
 
-static std::unique_ptr<RTCDataChannelHandler> createRTCDataChannelHandler(RTCDataChannelHandlerClient*, const String& label, RTCDataChannelInit_Endpoint& initData, OwrDataChannel* channel)
+static std::unique_ptr<RTCDataChannelHandler> createRTCDataChannelHandler(const String& label, RTCDataChannelInit_Endpoint& initData, OwrDataChannel* channel)
 {
     return nullptr;
 }

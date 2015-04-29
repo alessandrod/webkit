@@ -91,7 +91,7 @@ public:
 
     virtual void addRemoteCandidate(IceCandidate&, unsigned mdescIndex, const String& ufrag, const String& password) = 0;
 
-    virtual std::unique_ptr<RTCDataChannelHandler> createDataChannel(RTCDataChannelHandlerClient* client, const String& label, RTCDataChannelInit_Endpoint& initData) = 0;
+    virtual std::unique_ptr<RTCDataChannelHandler> createDataChannel(const String& label, RTCDataChannelInit_Endpoint& initData) = 0;
 
     virtual void stop() = 0;
 };
