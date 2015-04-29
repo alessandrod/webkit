@@ -47,8 +47,8 @@ CreateRTCDataChannelHandler RTCDataChannelHandler::create = createRTCDataChannel
 
 RTCDataChannelHandlerOwr::RTCDataChannelHandlerOwr(const String& label, RTCDataChannelInit_Endpoint& initData, OwrDataChannel* channel)
     : m_label(label)
-    , initData(initData)
-    , owrDataChannel(channel)
+    , m_initData(initData)
+    , m_owrDataChannel(channel)
 {
     
 }
@@ -66,27 +66,27 @@ String RTCDataChannelHandlerOwr::label(){
 };
 
 bool RTCDataChannelHandlerOwr::ordered(){
-    return initData.ordered ;
+    return m_initData.ordered ;
 };
 
 unsigned short RTCDataChannelHandlerOwr::maxRetransmitTime(){
-    return initData.maxRetransmitTime; 
+    return m_initData.maxRetransmitTime;
 };
 
 unsigned short RTCDataChannelHandlerOwr::maxRetransmits(){
-    return initData.maxRetransmits;
+    return m_initData.maxRetransmits;
 };
 
 String RTCDataChannelHandlerOwr::protocol(){
-    return initData.protocol;
+    return m_initData.protocol;
 };
 
 bool RTCDataChannelHandlerOwr::negotiated(){
-    return initData.negotiated; 
+    return m_initData.negotiated;
 };
 
 unsigned short RTCDataChannelHandlerOwr::id(){
-    return initData.id; 
+    return m_initData.id;
 };
 
 unsigned long RTCDataChannelHandlerOwr::bufferedAmount(){
@@ -94,8 +94,8 @@ unsigned long RTCDataChannelHandlerOwr::bufferedAmount(){
 };
 
 
-bool RTCDataChannelHandlerOwr::sendStringData(const String&){
-
+bool RTCDataChannelHandlerOwr::sendStringData(const String&)
+{
     
 };
 

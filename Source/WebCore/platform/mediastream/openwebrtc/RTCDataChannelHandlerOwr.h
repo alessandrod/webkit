@@ -65,11 +65,11 @@ private:
     unsigned short id;*/
     String m_label;
     unsigned long m_bufferedAmount;
-    RTCDataChannelInit_Endpoint& initData;
+    RTCDataChannelInit_Endpoint& m_initData;
     
 
     RTCDataChannelHandlerClient* m_client;
-    OwrDataChannel* owrDataChannel;
+    OwrDataChannel* m_owrDataChannel;
 };
 
 } // namespace WebCore
