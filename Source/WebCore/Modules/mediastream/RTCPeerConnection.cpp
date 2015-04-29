@@ -501,14 +501,14 @@ void RTCPeerConnection::getStats(PassRefPtr<RTCStatsCallback>, PassRefPtr<RTCPee
 {
 }
 
-PassRefPtr<RTCDataChannel> RTCPeerConnection::createDataChannel(String, const Dictionary&, ExceptionCode& ec)
+PassRefPtr<RTCDataChannel> RTCPeerConnection::createDataChannel(String label, const Dictionary& options, ExceptionCode& ec)
 {
     if (m_signalingState == SignalingStateClosed) {
         ec = INVALID_STATE_ERR;
         return nullptr;
     }
-
-    return nullptr;
+    PassRefPtr<RTCDataChannel> channel = RTCDataChannel::create(nullptr, m_mediaEndpoint, label, options, ec);
+    return channel;
 }
 
 void RTCPeerConnection::close()
