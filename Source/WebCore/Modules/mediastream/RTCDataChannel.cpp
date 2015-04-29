@@ -54,7 +54,7 @@ static const AtomicString& arraybufferKeyword()
     return arraybuffer;
 }
 
-PassRefPtr<RTCDataChannel> RTCDataChannel::create(ScriptExecutionContext* context, MediaEndpoint* peerConnectionHandler, const String& label, const Dictionary& options, ExceptionCode& ec)
+PassRefPtr<RTCDataChannel> RTCDataChannel::create(ScriptExecutionContext* context, MediaEndpoint* mediaEndpoint, const String& label, const Dictionary& options, ExceptionCode& ec)
 {
     RTCDataChannelInit_Endpoint initData;
     String maxRetransmitsStr;
@@ -75,8 +75,7 @@ PassRefPtr<RTCDataChannel> RTCDataChannel::create(ScriptExecutionContext* contex
         return nullptr;
     }
 
-    //std::unique_ptr<RTCDataChannelHandler> handler = peerConnectionHandler->createDataChannel(label, initData);
-    std::unique_ptr<RTCDataChannelHandler> handler = nullptr;
+    std::unique_ptr<RTCDataChannelHandler> handler = mediaEndpoint->createDataChannel(label, initData);
     if (!handler) {
         ec = NOT_SUPPORTED_ERR;
         return nullptr;
