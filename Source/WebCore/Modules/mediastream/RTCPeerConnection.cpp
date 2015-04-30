@@ -507,7 +507,7 @@ PassRefPtr<RTCDataChannel> RTCPeerConnection::createDataChannel(String label, co
         ec = INVALID_STATE_ERR;
         return nullptr;
     }
-    PassRefPtr<RTCDataChannel> channel = RTCDataChannel::create(nullptr, m_mediaEndpoint.get(), label, options, ec);
+    PassRefPtr<RTCDataChannel> channel = RTCDataChannel::create(scriptExecutionContext(), m_mediaEndpoint.get(), label, options, ec);
     return channel;
 }
 

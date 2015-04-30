@@ -111,13 +111,16 @@ unsigned long RTCDataChannelHandlerOwr::bufferedAmount(){
 };
 
 
-bool RTCDataChannelHandlerOwr::sendStringData(const String&)
+bool RTCDataChannelHandlerOwr::sendStringData(const String& data)
 {
-    
+    owr_data_channel_send(m_owrDataChannel, data.ascii().data());
 };
 
-bool RTCDataChannelHandlerOwr::sendRawData(const char*, size_t){
-
+bool RTCDataChannelHandlerOwr::sendRawData(const char* data, size_t size)
+{
+    const gchar *binary_message;
+    binary_message = data;
+    owr_data_channel_send_binary(m_owrDataChannel, (const guint8 *) binary_message, size);
     
 };
 
