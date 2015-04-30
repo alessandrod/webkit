@@ -32,6 +32,7 @@
 
 #if ENABLE(MEDIA_STREAM)
 #include "RTCDataChannelHandlerOwr.h"
+ #include "RTCDataChannelHandlerClient.h"
 #include "MediaEndpoint.h"
 #include <wtf/text/CString.h>
 
@@ -43,17 +44,9 @@ static std::unique_ptr<RTCDataChannelHandler> createRTCDataChannelHandlerOwr( co
     return std::unique_ptr<RTCDataChannelHandler>(new RTCDataChannelHandlerOwr(label, initData, channel));
 }
 
-static void onData(OwrDataChannel *data_channel, const gchar *string, RTCDataChannelHandler *handler){
-    //TODO Convert string to String
-    RTCDataChannelHandlerClient* client = handler->client();
-    client->didReceiveStringData(string);
-
-}
-
-static void onRawData(OwrDataChannel *data_channel, const gchar *data, guint length, RTCDataChannelHandler *handler){
-    RTCDataChannelHandlerClient* client = handler->client();
-    client->didReceiveRawData(data, length);
-};
+static void onData(OwrDataChannel *data_channel, const gchar *string, RTCDataChannelHandler *handler);
+static void onRawData(OwrDataChannel *data_channel, const gchar *data, guint length, RTCDataChannelHandler *handler);
+static void onReadyState(OwrDataChannel *data_channel, GParamSpec *pspec, RTCDataChannelHandler *handler);
 
 CreateRTCDataChannelHandler RTCDataChannelHandler::create = createRTCDataChannelHandlerOwr;
 
@@ -64,6 +57,8 @@ RTCDataChannelHandlerOwr::RTCDataChannelHandlerOwr(const String& label, RTCDataC
 {
     g_signal_connect(m_owrDataChannel, "on-data", G_CALLBACK(onData), this);
     g_signal_connect(m_owrDataChannel, "on-binary-data", G_CALLBACK(onRawData), this);
+    g_signal_connect(m_owrDataChannel, "notify::ready-state", G_CALLBACK(onReadyState), this);
+
 }
 
 RTCDataChannelHandlerOwr::~RTCDataChannelHandlerOwr()
@@ -126,6 +121,42 @@ bool RTCDataChannelHandlerOwr::sendRawData(const char* data, size_t size)
 
 void RTCDataChannelHandlerOwr::close(){
     owr_data_channel_close(m_owrDataChannel);
+};
+
+static void onData(OwrDataChannel *data_channel, const gchar *string, RTCDataChannelHandler *handler){
+    //TODO Convert string to String
+    RTCDataChannelHandlerClient* client = handler->client();
+    client->didReceiveStringData(string);
+
+}
+
+static void onRawData(OwrDataChannel *data_channel, const gchar *data, guint length, RTCDataChannelHandler *handler){
+    RTCDataChannelHandlerClient* client = handler->client();
+    client->didReceiveRawData(data, length);
+};
+
+static void onReadyState(OwrDataChannel *data_channel, GParamSpec *pspec, RTCDataChannelHandler *handler){
+    gint ready_state;
+
+    g_object_get(data_channel, "ready-state", &ready_state, NULL);
+
+    RTCDataChannelHandlerClient::ReadyState state;
+    if (ready_state == OWR_DATA_CHANNEL_READY_STATE_CONNECTING) {
+        state = RTCDataChannelHandlerClient::ReadyStateConnecting;
+        handler->client()->didChangeReadyState(state);
+    }
+    else if (ready_state == OWR_DATA_CHANNEL_READY_STATE_OPEN) {
+        state = RTCDataChannelHandlerClient::ReadyStateOpen;
+        handler->client()->didChangeReadyState(state);
+    }
+    else if (ready_state == OWR_DATA_CHANNEL_READY_STATE_CLOSING) {
+        state = RTCDataChannelHandlerClient::ReadyStateClosing;
+        handler->client()->didChangeReadyState(state);
+    }
+    else if (ready_state == OWR_DATA_CHANNEL_READY_STATE_CLOSED) {
+        state = RTCDataChannelHandlerClient::ReadyStateClosed;
+        handler->client()->didChangeReadyState(state);
+    }
 };
 
 } // namespace WebCore
