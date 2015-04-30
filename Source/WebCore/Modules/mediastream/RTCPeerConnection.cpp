@@ -50,6 +50,7 @@
 #include "PeerMediaDescription.h"
 #include "RTCConfiguration.h"
 #include "RTCDataChannel.h"
+#include "RTCDataChannelEvent.h"
 #include "RTCIceCandidate.h"
 #include "RTCIceCandidateEvent.h"
 #include "RTCOfferAnswerOptions.h"
@@ -611,9 +612,12 @@ void RTCPeerConnection::gotRemoteSource(unsigned, RefPtr<RealTimeMediaSource>&&)
 {
 }
 
-void RTCPeerConnection::gotDataChannel(unsigned mdescIndex, std::unique_ptr<RTCDataChannelHandler>)
+void RTCPeerConnection::gotDataChannel(unsigned mdescIndex, std::unique_ptr<RTCDataChannelHandler> handler)
 {
+    printf("-> gotDataChannel()\n");
 
+    PassRefPtr<RTCDataChannel> channel = RTCDataChannel::create(scriptExecutionContext(), WTF::move(handler));
+    scheduleDispatchEvent(RTCDataChannelEvent::create(false, false, WTF::move(channel)));
 }
 
 void RTCPeerConnection::stop()
