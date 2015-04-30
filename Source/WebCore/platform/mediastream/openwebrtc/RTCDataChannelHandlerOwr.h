@@ -40,6 +40,7 @@ public:
     ~RTCDataChannelHandlerOwr();
 
     virtual void setClient(RTCDataChannelHandlerClient*);
+    virtual RTCDataChannelHandlerClient* client();
 
     virtual String label();
     virtual bool ordered();
@@ -49,11 +50,14 @@ public:
     virtual bool negotiated();
     virtual unsigned short id();
     virtual unsigned long bufferedAmount();
-    //virtual OwrDataChannel owrDataChannel();
+    
 
     virtual bool sendStringData(const String&);
     virtual bool sendRawData(const char*, size_t);
     virtual void close();
+
+    //void onData(OwrDataChannel *data_channel, const gchar *string, RTCDataChannelHandler *handler);
+    //void onRawData(OwrDataChannel *data_channel, const gchar *data, guint length, RTCDataChannelHandler *handler);
 
 private:
     /*

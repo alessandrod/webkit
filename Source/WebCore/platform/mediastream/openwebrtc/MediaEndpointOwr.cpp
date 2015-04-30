@@ -31,15 +31,15 @@
 #include "config.h"
 
 #if ENABLE(MEDIA_STREAM)
-#include "RTCDataChannelHandlerOwr.h"
 #include "MediaEndpointOwr.h"
+
+#include "RTCDataChannelHandlerOwr.h"
 #include "MediaEndpointConfiguration.h"
 #include "OpenWebRTCUtilities.h"
 #include "RealtimeMediaSourceOwr.h"
 #include <owr/owr.h>
 #include <owr/owr_audio_payload.h>
 #include <owr/owr_video_payload.h>
-#include "ConvertToUTF8String.h"
 #include <wtf/text/CString.h>
 #include <wtf/text/WTFString.h>
 

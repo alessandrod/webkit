@@ -43,6 +43,18 @@ static std::unique_ptr<RTCDataChannelHandler> createRTCDataChannelHandlerOwr( co
     return std::unique_ptr<RTCDataChannelHandler>(new RTCDataChannelHandlerOwr(label, initData, channel));
 }
 
+static void onData(OwrDataChannel *data_channel, const gchar *string, RTCDataChannelHandler *handler){
+    //TODO Convert string to String
+    RTCDataChannelHandlerClient* client = handler->client();
+    client->didReceiveStringData(string);
+
+}
+
+static void onRawData(OwrDataChannel *data_channel, const gchar *data, guint length, RTCDataChannelHandler *handler){
+    RTCDataChannelHandlerClient* client = handler->client();
+    client->didReceiveRawData(data, length);
+};
+
 CreateRTCDataChannelHandler RTCDataChannelHandler::create = createRTCDataChannelHandlerOwr;
 
 RTCDataChannelHandlerOwr::RTCDataChannelHandlerOwr(const String& label, RTCDataChannelInit_Endpoint& initData, OwrDataChannel* channel)
@@ -50,7 +62,8 @@ RTCDataChannelHandlerOwr::RTCDataChannelHandlerOwr(const String& label, RTCDataC
     , m_initData(initData)
     , m_owrDataChannel(channel)
 {
-    
+    g_signal_connect(m_owrDataChannel, "on-data", G_CALLBACK(onData), this);
+    g_signal_connect(m_owrDataChannel, "on-binary-data", G_CALLBACK(onRawData), this);
 }
 
 RTCDataChannelHandlerOwr::~RTCDataChannelHandlerOwr()
@@ -59,6 +72,10 @@ RTCDataChannelHandlerOwr::~RTCDataChannelHandlerOwr()
 
 void RTCDataChannelHandlerOwr::setClient(RTCDataChannelHandlerClient* client){
     m_client = client;
+};
+
+RTCDataChannelHandlerClient* RTCDataChannelHandlerOwr::client(){
+    return m_client;
 };
 
 String RTCDataChannelHandlerOwr::label(){
@@ -107,6 +124,10 @@ bool RTCDataChannelHandlerOwr::sendRawData(const char*, size_t){
 void RTCDataChannelHandlerOwr::close(){
     
 };
+
+
+
+
 
 
 } // namespace WebCore

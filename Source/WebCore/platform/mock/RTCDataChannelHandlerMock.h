@@ -40,6 +40,7 @@ public:
     virtual ~RTCDataChannelHandlerMock() { }
 
     virtual void setClient(RTCDataChannelHandlerClient*) override;
+    virtual RTCDataChannelHandlerClient* client() override { return m_client; };
 
     virtual String label() override { return m_label; }
     virtual bool ordered() override { return m_ordered; }

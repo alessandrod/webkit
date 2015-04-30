@@ -46,6 +46,7 @@ public:
     virtual ~RTCDataChannelHandler() { }
 
     virtual void setClient(RTCDataChannelHandlerClient*) = 0;
+    virtual RTCDataChannelHandlerClient* client() = 0;
 
     virtual String label() = 0;
     virtual bool ordered() = 0;
