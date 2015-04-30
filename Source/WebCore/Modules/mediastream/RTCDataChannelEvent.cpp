@@ -37,18 +37,18 @@ Ref<RTCDataChannelEvent> RTCDataChannelEvent::create()
     return adoptRef(*new RTCDataChannelEvent);
 }
 
-Ref<RTCDataChannelEvent> RTCDataChannelEvent::create(const AtomicString& type, bool canBubble, bool cancelable, PassRefPtr<RTCDataChannel> channel)
+Ref<RTCDataChannelEvent> RTCDataChannelEvent::create(bool canBubble, bool cancelable, RefPtr<RTCDataChannel>&& channel)
 {
-    return adoptRef(*new RTCDataChannelEvent(type, canBubble, cancelable, channel));
+    return adoptRef(*new RTCDataChannelEvent(canBubble, cancelable, WTF::move(channel)));
 }
 
 RTCDataChannelEvent::RTCDataChannelEvent()
 {
 }
 
-RTCDataChannelEvent::RTCDataChannelEvent(const AtomicString& type, bool canBubble, bool cancelable, PassRefPtr<RTCDataChannel> channel)
-    : Event(type, canBubble, cancelable)
-    , m_channel(channel)
+RTCDataChannelEvent::RTCDataChannelEvent(bool canBubble, bool cancelable, RefPtr<RTCDataChannel>&& channel)
+    : Event(eventNames().datachannelEvent, canBubble, cancelable)
+    , m_channel(WTF::move(channel))
 {
 }
 

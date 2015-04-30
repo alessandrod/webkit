@@ -38,7 +38,7 @@ public:
     virtual ~RTCDataChannelEvent();
 
     static Ref<RTCDataChannelEvent> create();
-    static Ref<RTCDataChannelEvent> create(const AtomicString& type, bool canBubble, bool cancelable, PassRefPtr<RTCDataChannel>);
+    static Ref<RTCDataChannelEvent> create(bool canBubble, bool cancelable, RefPtr<RTCDataChannel>&&);
 
     RTCDataChannel* channel() const;
 
@@ -46,7 +46,7 @@ public:
 
 private:
     RTCDataChannelEvent();
-    RTCDataChannelEvent(const AtomicString& type, bool canBubble, bool cancelable, PassRefPtr<RTCDataChannel>);
+    RTCDataChannelEvent(bool canBubble, bool cancelable, RefPtr<RTCDataChannel>&&);
 
     RefPtr<RTCDataChannel> m_channel;
 };
