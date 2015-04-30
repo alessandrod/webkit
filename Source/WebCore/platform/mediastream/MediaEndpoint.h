@@ -72,6 +72,7 @@ public:
     virtual void gotIceCandidate(unsigned mdescIndex, RefPtr<IceCandidate>&&, const String& ufrag, const String& password) = 0;
     virtual void doneGatheringCandidates(unsigned mdescIndex) = 0;
     virtual void gotRemoteSource(unsigned mdescIndex, RefPtr<RealTimeMediaSource>&&) = 0;
+    virtual void gotDataChannel(unsigned mdescIndex, RefPtr<RTCDataChannelHandler>&&) = 0;
 
     virtual ~MediaEndpointClient() { }
 };

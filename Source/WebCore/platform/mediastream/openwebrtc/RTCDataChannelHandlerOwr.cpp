@@ -125,13 +125,8 @@ bool RTCDataChannelHandlerOwr::sendRawData(const char* data, size_t size)
 };
 
 void RTCDataChannelHandlerOwr::close(){
-    
+    owr_data_channel_close(m_owrDataChannel);
 };
-
-
-
-
-
 
 } // namespace WebCore
 

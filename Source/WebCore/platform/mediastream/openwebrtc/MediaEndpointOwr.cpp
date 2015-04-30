@@ -180,10 +180,11 @@ std::unique_ptr<RTCDataChannelHandler> MediaEndpointOwr::createDataChannel(const
     OwrDataSession* session = owr_data_session_new(true);
     gchar* protocol_conversion = g_strdup(initData.protocol.ascii().data());
     gchar* label_conversion = g_strdup(label.ascii().data());
-    //OwrDataChannel* channel = owr_data_channel_new(initData.ordered, initData.maxRetransmitTime, initData.maxRetransmits, protocol_conversion, initData.negotiated, initData.id, label_conversion);
+
     OwrDataChannel* channel = owr_data_channel_new(initData.ordered, -1, 0, protocol_conversion, initData.negotiated, initData.id, label_conversion);
     owr_data_session_add_data_channel(session, channel);
-    //printf("MediaEndpointOwr::createDataChannel : protocol : %s %s \n", protocol_conversion, label_conversion);
+    
+    //m_sessions.append(session);
     std::unique_ptr<RTCDataChannelHandler> handler = RTCDataChannelHandler::create(label, initData, channel);
 
     return handler;
@@ -219,6 +220,11 @@ void MediaEndpointOwr::dispatchDtlsCertificate(unsigned sessionIndex, const Stri
 void MediaEndpointOwr::dispatchSendSSRC(unsigned sessionIndex, const String& ssrc, const String& cname)
 {
     m_client->gotSendSSRC(sessionIndex, ssrc, cname);
+}
+
+void MediaEndpointOwr::dispatchNewDataChannel(unsigned sessionIndex, RefPtr<RTCDataChannelHandler>&& handler)
+{
+    m_client->gotDataChannel(sessionIndex, WTF::move(handler));
 }
 
 void MediaEndpointOwr::prepareSession(OwrSession* session, PeerMediaDescription*)

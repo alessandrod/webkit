@@ -611,6 +611,11 @@ void RTCPeerConnection::gotRemoteSource(unsigned, RefPtr<RealTimeMediaSource>&&)
 {
 }
 
+void RTCPeerConnection::gotDataChannel(unsigned mdescIndex, RefPtr<RTCDataChannelHandler>&&)
+{
+
+}
+
 void RTCPeerConnection::stop()
 {
     if (m_stopped)
