@@ -67,7 +67,7 @@ public:
     void dispatchGatheringDone(unsigned sessionIndex);
     void dispatchDtlsCertificate(unsigned sessionIndex, const String& certificate);
     void dispatchSendSSRC(unsigned sessionIndex, const String& ssrc, const String& cname);
-    void dispatchNewDataChannel(unsigned sessionIndex, RefPtr<RTCDataChannelHandler>&&);
+    void dispatchNewDataChannel(unsigned sessionIndex, std::unique_ptr<RTCDataChannelHandler>);
 
 private:
     enum SessionType {

@@ -51,7 +51,7 @@ static void candidateGatheringDone(OwrSession*, MediaEndpointOwr*);
 static void gotDtlsCertificate(OwrSession*, GParamSpec*, MediaEndpointOwr*);
 static void gotSendSsrc(OwrMediaSession*, GParamSpec*, MediaEndpointOwr*);
 static void gotIncomingSource(OwrMediaSession*, OwrMediaSource*, MediaEndpointOwr*);
-static void dataChannelRequested();
+static void dataChannelRequested(OwrDataSession* dataSession, bool ordered, int maxRetransmitTime, int maxRetransmits, const gchar *protocol, bool negotiated, int id, const gchar *label, MediaEndpointOwr* mediaEndpoint);
 
 static const Vector<String> candidateTypes = { "host", "srflx", "prflx", "relay" };
 static const Vector<String> candidateTcpTypes = { "", "active", "passive", "so" };
@@ -180,11 +180,11 @@ std::unique_ptr<RTCDataChannelHandler> MediaEndpointOwr::createDataChannel(const
     OwrDataSession* session = owr_data_session_new(true);
     gchar* protocol_conversion = g_strdup(initData.protocol.ascii().data());
     gchar* label_conversion = g_strdup(label.ascii().data());
-
+    //FIX ME : add maxRetransmitTime et maxRetransmits parameters in owr_data_channel_new
     OwrDataChannel* channel = owr_data_channel_new(initData.ordered, -1, 0, protocol_conversion, initData.negotiated, initData.id, label_conversion);
     owr_data_session_add_data_channel(session, channel);
     
-    //m_sessions.append(session);
+    m_sessions.append(OWR_SESSION(session));
     std::unique_ptr<RTCDataChannelHandler> handler = RTCDataChannelHandler::create(label, initData, channel);
 
     return handler;
@@ -222,7 +222,7 @@ void MediaEndpointOwr::dispatchSendSSRC(unsigned sessionIndex, const String& ssr
     m_client->gotSendSSRC(sessionIndex, ssrc, cname);
 }
 
-void MediaEndpointOwr::dispatchNewDataChannel(unsigned sessionIndex, RefPtr<RTCDataChannelHandler>&& handler)
+void MediaEndpointOwr::dispatchNewDataChannel(unsigned sessionIndex, std::unique_ptr<RTCDataChannelHandler> handler)
 {
     m_client->gotDataChannel(sessionIndex, WTF::move(handler));
 }
@@ -421,9 +421,26 @@ static void gotIncomingSource(OwrMediaSession*, OwrMediaSource*, MediaEndpointOw
     printf("-> gotIncomingSource\n");
 }
 
-static void dataChannelRequested()
+static void dataChannelRequested(OwrDataSession* dataSession, bool ordered, int maxRetransmitTime, int maxRetransmits, const gchar *protocol, bool negotiated, int id, const gchar *label, MediaEndpointOwr* mediaEndpoint )
 {
     printf("-> dataChannelRequested\n");
+    OwrDataSession* newSession = owr_data_session_new(true);
+    //FIX ME : add maxRetransmitTime et maxRetransmits parameters in owr_data_channel_new
+    OwrDataChannel* newChannel = owr_data_channel_new(ordered, maxRetransmitTime, maxRetransmits, protocol, negotiated, id, label);
+    owr_data_session_add_data_channel(newSession, newChannel);
+    
+    RTCDataChannelInit_Endpoint initData;
+
+    initData.ordered = ordered;
+    initData.id = id;
+    initData.maxRetransmitTime = maxRetransmitTime;
+    initData.maxRetransmits = maxRetransmits;
+    initData.protocol = protocol;
+    initData.negotiated = negotiated;
+
+    std::unique_ptr<RTCDataChannelHandler> handler =  mediaEndpoint->createDataChannel(label, initData);
+
+    mediaEndpoint->dispatchNewDataChannel(mediaEndpoint->sessionIndex(OWR_SESSION(dataSession)), WTF::move(handler));
 }
 
 } // namespace WebCore

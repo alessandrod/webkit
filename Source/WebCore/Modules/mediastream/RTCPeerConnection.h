@@ -104,7 +104,7 @@ public:
     virtual void gotIceCandidate(unsigned mdescIndex, RefPtr<IceCandidate>&&, const String& ufrag, const String& password) override;
     virtual void doneGatheringCandidates(unsigned mdescIndex) override;
     virtual void gotRemoteSource(unsigned mdescIndex, RefPtr<RealTimeMediaSource>&&) override;
-    virtual void gotDataChannel(unsigned mdescIndex, RefPtr<RTCDataChannelHandler>&&) override;
+    virtual void gotDataChannel(unsigned mdescIndex, std::unique_ptr<RTCDataChannelHandler>) override;
 
     // EventTarget
     virtual EventTargetInterface eventTargetInterface() const override { return RTCPeerConnectionEventTargetInterfaceType; }

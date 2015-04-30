@@ -611,7 +611,7 @@ void RTCPeerConnection::gotRemoteSource(unsigned, RefPtr<RealTimeMediaSource>&&)
 {
 }
 
-void RTCPeerConnection::gotDataChannel(unsigned mdescIndex, RefPtr<RTCDataChannelHandler>&&)
+void RTCPeerConnection::gotDataChannel(unsigned mdescIndex, std::unique_ptr<RTCDataChannelHandler>)
 {
 
 }
