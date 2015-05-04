@@ -185,7 +185,7 @@ std::unique_ptr<RTCDataChannelHandler> MediaEndpointOwr::createDataChannel(const
     owr_data_session_add_data_channel(session, channel);
     
     m_sessions.append(OWR_SESSION(session));
-    std::unique_ptr<RTCDataChannelHandler> handler = RTCDataChannelHandler::create(label, initData, channel);
+    std::unique_ptr<RTCDataChannelHandler> handler = RTCDataChannelHandler::create(label, initData.ordered, -1, 0, protocol_conversion, initData.negotiated, initData.id, channel);
 
     return handler;
 }

@@ -36,7 +36,7 @@ class RTCDataChannelHandlerClient;
 
 class RTCDataChannelHandlerOwr : public RTCDataChannelHandler {
 public:
-    RTCDataChannelHandlerOwr(const String&, RTCDataChannelInit_Endpoint&, OwrDataChannel*);
+    RTCDataChannelHandlerOwr(const String&, bool, unsigned short, unsigned short, const String&, bool, unsigned short, OwrDataChannel*);
     ~RTCDataChannelHandlerOwr();
 
     virtual void setClient(RTCDataChannelHandlerClient*);
@@ -56,20 +56,18 @@ public:
     virtual bool sendRawData(const char*, size_t);
     virtual void close();
 
-    //void onData(OwrDataChannel *data_channel, const gchar *string, RTCDataChannelHandler *handler);
-    //void onRawData(OwrDataChannel *data_channel, const gchar *data, guint length, RTCDataChannelHandler *handler);
 
 private:
-    /*
-    bool ordered;
-    unsigned short maxRetransmitTime,
-    unsigned short maxRetransmits,
-    String protocol,
-    bool negotiated,
-    unsigned short id;*/
+
     String m_label;
+    bool m_ordered;
+    unsigned short m_maxRetransmitTime;
+    unsigned short m_maxRetransmits;
+    String m_protocol;
+    bool m_negotiated;
+    unsigned short m_id;
+    
     unsigned long m_bufferedAmount;
-    RTCDataChannelInit_Endpoint& m_initData;
     
 
     RTCDataChannelHandlerClient* m_client;

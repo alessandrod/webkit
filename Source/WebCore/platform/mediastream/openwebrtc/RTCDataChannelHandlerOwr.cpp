@@ -39,9 +39,9 @@
 namespace WebCore {
 
 
-static std::unique_ptr<RTCDataChannelHandler> createRTCDataChannelHandlerOwr( const String& label, RTCDataChannelInit_Endpoint& initData, OwrDataChannel* channel)
+static std::unique_ptr<RTCDataChannelHandler> createRTCDataChannelHandlerOwr( const String& label, bool ordered, unsigned short maxRetransmitTime, unsigned short maxRetransmits, const String& protocol, bool negotiated, unsigned short id, OwrDataChannel* channel)
 {
-    return std::unique_ptr<RTCDataChannelHandler>(new RTCDataChannelHandlerOwr(label, initData, channel));
+    return std::unique_ptr<RTCDataChannelHandler>(new RTCDataChannelHandlerOwr(label, ordered, maxRetransmitTime, maxRetransmits, protocol, negotiated, id, channel));
 }
 
 static void onData(OwrDataChannel *data_channel, const gchar *string, RTCDataChannelHandler *handler);
@@ -50,9 +50,14 @@ static void onReadyState(OwrDataChannel *data_channel, GParamSpec *pspec, RTCDat
 
 CreateRTCDataChannelHandler RTCDataChannelHandler::create = createRTCDataChannelHandlerOwr;
 
-RTCDataChannelHandlerOwr::RTCDataChannelHandlerOwr(const String& label, RTCDataChannelInit_Endpoint& initData, OwrDataChannel* channel)
+RTCDataChannelHandlerOwr::RTCDataChannelHandlerOwr(const String& label, bool ordered, unsigned short maxRetransmitTime, unsigned short maxRetransmits, const String& protocol, bool negotiated, unsigned short id, OwrDataChannel* channel)
     : m_label(label)
-    , m_initData(initData)
+    , m_ordered(ordered)
+    , m_maxRetransmitTime(maxRetransmitTime)
+    , m_maxRetransmits(maxRetransmits)
+    , m_protocol(protocol)
+    , m_negotiated(negotiated)
+    , m_id(id)
     , m_owrDataChannel(channel)
 {
     g_signal_connect(m_owrDataChannel, "on-data", G_CALLBACK(onData), this);
@@ -78,27 +83,27 @@ String RTCDataChannelHandlerOwr::label(){
 };
 
 bool RTCDataChannelHandlerOwr::ordered(){
-    return m_initData.ordered ;
+    return m_ordered ;
 };
 
 unsigned short RTCDataChannelHandlerOwr::maxRetransmitTime(){
-    return m_initData.maxRetransmitTime;
+    return m_maxRetransmitTime;
 };
 
 unsigned short RTCDataChannelHandlerOwr::maxRetransmits(){
-    return m_initData.maxRetransmits;
+    return m_maxRetransmits;
 };
 
 String RTCDataChannelHandlerOwr::protocol(){
-    return m_initData.protocol;
+    return m_protocol;
 };
 
 bool RTCDataChannelHandlerOwr::negotiated(){
-    return m_initData.negotiated;
+    return m_negotiated;
 };
 
 unsigned short RTCDataChannelHandlerOwr::id(){
-    return m_initData.id;
+    return m_id;
 };
 
 unsigned long RTCDataChannelHandlerOwr::bufferedAmount(){
