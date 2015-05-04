@@ -44,7 +44,6 @@ namespace WebCore {
 class PeerMediaDescription;
 class RTCConfigurationPrivate;
 
-
 class MediaEndpointOwr : public MediaEndpoint {
 public:
     MediaEndpointOwr(MediaEndpointClient*);
@@ -86,9 +85,6 @@ private:
 
     void ensureTransportAgentAndSessions(bool isInitiator, const Vector<SessionConfig>& sessionConfigs);
     void internalAddRemoteCandidate(OwrSession*, IceCandidate&, const String& ufrag, const String& password);
-
-
-
 
     RefPtr<MediaEndpointInit> m_configuration;
 

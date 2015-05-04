@@ -174,7 +174,6 @@ void MediaEndpointOwr::addRemoteCandidate(IceCandidate& candidate, unsigned mdes
     internalAddRemoteCandidate(m_sessions[mdescIndex], candidate, ufrag, password);
 }
 
-
 std::unique_ptr<RTCDataChannelHandler> MediaEndpointOwr::createDataChannel(const String& label, RTCDataChannelInit_Endpoint& initData)
 {   
     OwrDataSession* session = owr_data_session_new(true);

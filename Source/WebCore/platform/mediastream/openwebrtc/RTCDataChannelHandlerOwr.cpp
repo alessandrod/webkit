@@ -32,12 +32,11 @@
 
 #if ENABLE(MEDIA_STREAM)
 #include "RTCDataChannelHandlerOwr.h"
- #include "RTCDataChannelHandlerClient.h"
+#include "RTCDataChannelHandlerClient.h"
 #include "MediaEndpoint.h"
 #include <wtf/text/CString.h>
 
 namespace WebCore {
-
 
 static std::unique_ptr<RTCDataChannelHandler> createRTCDataChannelHandlerOwr( const String& label, bool ordered, unsigned short maxRetransmitTime, unsigned short maxRetransmits, const String& protocol, bool negotiated, unsigned short id, OwrDataChannel* channel)
 {
@@ -63,84 +62,93 @@ RTCDataChannelHandlerOwr::RTCDataChannelHandlerOwr(const String& label, bool ord
     g_signal_connect(m_owrDataChannel, "on-data", G_CALLBACK(onData), this);
     g_signal_connect(m_owrDataChannel, "on-binary-data", G_CALLBACK(onRawData), this);
     g_signal_connect(m_owrDataChannel, "notify::ready-state", G_CALLBACK(onReadyState), this);
-
 }
 
 RTCDataChannelHandlerOwr::~RTCDataChannelHandlerOwr()
 {
 }
 
-void RTCDataChannelHandlerOwr::setClient(RTCDataChannelHandlerClient* client){
+void RTCDataChannelHandlerOwr::setClient(RTCDataChannelHandlerClient* client)
+{
     m_client = client;
-};
+}
 
-RTCDataChannelHandlerClient* RTCDataChannelHandlerOwr::client(){
+RTCDataChannelHandlerClient* RTCDataChannelHandlerOwr::client()
+{
     return m_client;
-};
+}
 
-String RTCDataChannelHandlerOwr::label(){
+String RTCDataChannelHandlerOwr::label()
+{
     return m_label;
-};
+}
 
-bool RTCDataChannelHandlerOwr::ordered(){
+bool RTCDataChannelHandlerOwr::ordered()
+{
     return m_ordered ;
-};
+}
 
-unsigned short RTCDataChannelHandlerOwr::maxRetransmitTime(){
+unsigned short RTCDataChannelHandlerOwr::maxRetransmitTime()
+{
     return m_maxRetransmitTime;
-};
+}
 
-unsigned short RTCDataChannelHandlerOwr::maxRetransmits(){
+unsigned short RTCDataChannelHandlerOwr::maxRetransmits()
+{
     return m_maxRetransmits;
-};
+}
 
-String RTCDataChannelHandlerOwr::protocol(){
+String RTCDataChannelHandlerOwr::protocol()
+{
     return m_protocol;
-};
+}
 
-bool RTCDataChannelHandlerOwr::negotiated(){
+bool RTCDataChannelHandlerOwr::negotiated()
+{
     return m_negotiated;
-};
+}
 
-unsigned short RTCDataChannelHandlerOwr::id(){
+unsigned short RTCDataChannelHandlerOwr::id()
+{
     return m_id;
-};
+}
 
-unsigned long RTCDataChannelHandlerOwr::bufferedAmount(){
+unsigned long RTCDataChannelHandlerOwr::bufferedAmount()
+{
     return m_bufferedAmount;    
-};
-
+}
 
 bool RTCDataChannelHandlerOwr::sendStringData(const String& data)
 {
     owr_data_channel_send(m_owrDataChannel, data.ascii().data());
-};
+}
 
 bool RTCDataChannelHandlerOwr::sendRawData(const char* data, size_t size)
 {
     const gchar *binary_message;
     binary_message = data;
     owr_data_channel_send_binary(m_owrDataChannel, (const guint8 *) binary_message, size);
-    
-};
-
-void RTCDataChannelHandlerOwr::close(){
-    owr_data_channel_close(m_owrDataChannel);
-};
-
-static void onData(OwrDataChannel *data_channel, const gchar *string, RTCDataChannelHandler *handler){
-    //TODO Convert string to String
-    RTCDataChannelHandlerClient* client = handler->client();
-    client->didReceiveStringData(string);
-
 }
 
-static void onRawData(OwrDataChannel *data_channel, const gchar *data, guint length, RTCDataChannelHandler *handler){
+void RTCDataChannelHandlerOwr::close()
+{
+    owr_data_channel_close(m_owrDataChannel);
+}
+
+static void onData(OwrDataChannel *data_channel, const gchar *string, RTCDataChannelHandler *handler)
+{
+    RTCDataChannelHandlerClient* client = handler->client();
+    client->didReceiveStringData(string);
+}
+
+static void onRawData(OwrDataChannel *data_channel, const gchar *data, guint length, RTCDataChannelHandler *handler)
+{
     RTCDataChannelHandlerClient* client = handler->client();
     client->didReceiveRawData(data, length);
-};
+}
 
-static void onReadyState(OwrDataChannel *data_channel, GParamSpec *pspec, RTCDataChannelHandler *handler){
+static void onReadyState(OwrDataChannel *data_channel, GParamSpec *pspec, RTCDataChannelHandler *handler)
+{
     gint ready_state;
 
     g_object_get(data_channel, "ready-state", &ready_state, NULL);
@@ -162,7 +170,7 @@ static void onReadyState(OwrDataChannel *data_channel, GParamSpec *pspec, RTCDat
         state = RTCDataChannelHandlerClient::ReadyStateClosed;
         handler->client()->didChangeReadyState(state);
     }
-};
+}
 
 } // namespace WebCore
 

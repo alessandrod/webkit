@@ -51,14 +51,11 @@ public:
     virtual unsigned short id();
     virtual unsigned long bufferedAmount();
     
-
     virtual bool sendStringData(const String&);
     virtual bool sendRawData(const char*, size_t);
     virtual void close();
 
-
 private:
-
     String m_label;
     bool m_ordered;
     unsigned short m_maxRetransmitTime;
@@ -69,7 +66,6 @@ private:
     
     unsigned long m_bufferedAmount;
     
-
     RTCDataChannelHandlerClient* m_client;
     OwrDataChannel* m_owrDataChannel;
 };
