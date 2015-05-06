@@ -91,6 +91,7 @@ private:
 
     OwrTransportAgent* m_transportAgent;
     Vector<OwrSession*> m_sessions;
+    Vector<OwrDataChannel*> m_dataChannels;
 
     MediaEndpointClient* m_client;
 

@@ -180,9 +180,10 @@ std::unique_ptr<RTCDataChannelHandler> MediaEndpointOwr::createDataChannel(const
     gchar* protocol_conversion = g_strdup(initData.protocol.ascii().data());
     gchar* label_conversion = g_strdup(label.ascii().data());
     //FIX ME : add maxRetransmitTime et maxRetransmits parameters in owr_data_channel_new
-    OwrDataChannel* channel = owr_data_channel_new(initData.ordered, -1, 0, protocol_conversion, initData.negotiated, initData.id, label_conversion);
+    OwrDataChannel* channel = owr_data_channel_new(initData.ordered, 5000, -1, protocol_conversion, initData.negotiated, initData.id, label_conversion);
+    m_dataChannels.append(channel);   
     
-    std::unique_ptr<RTCDataChannelHandler> handler = RTCDataChannelHandler::create(label, initData.ordered, -1, 0, protocol_conversion, initData.negotiated, initData.id, channel);
+    std::unique_ptr<RTCDataChannelHandler> handler = RTCDataChannelHandler::create(label, initData.ordered, 5000, -1, protocol_conversion, initData.negotiated, initData.id, channel);
 
     return handler;
 }
@@ -270,9 +271,9 @@ void MediaEndpointOwr::prepareDataSession(OwrDataSession* dataSession, PeerMedia
     prepareSession(OWR_SESSION(dataSession), mediaDescription);
   
     g_object_set(dataSession, "sctp-local-port", mediaDescription->port(), nullptr);
-  
     g_signal_connect(dataSession, "on-data-channel-requested", G_CALLBACK(dataChannelRequested), this);
-
+    
+    owr_data_session_add_data_channel(dataSession, m_dataChannels[0]);
 }
 
 void MediaEndpointOwr::ensureTransportAgentAndSessions(bool isInitiator, const Vector<SessionConfig>& sessionConfigs)

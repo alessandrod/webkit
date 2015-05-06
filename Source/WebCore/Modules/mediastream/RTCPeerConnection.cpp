@@ -633,6 +633,7 @@ void RTCPeerConnection::gotDataChannel(unsigned mdescIndex, std::unique_ptr<RTCD
     printf("-> gotDataChannel()\n");
 
     PassRefPtr<RTCDataChannel> channel = RTCDataChannel::create(scriptExecutionContext(), WTF::move(handler));
+    m_dataChannels.append(channel.get());
     scheduleDispatchEvent(RTCDataChannelEvent::create(false, false, WTF::move(channel)));
 }
 
