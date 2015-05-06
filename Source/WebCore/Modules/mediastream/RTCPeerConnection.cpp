@@ -372,11 +372,18 @@ void RTCPeerConnection::setRemoteDescription(RTCSessionDescription* description,
         return;
     }
 
+    m_remoteConfiguration = MediaEndpointConfigurationConversions::fromJSON(description->sdp());
+    m_remoteConfigurationType = description->type();
+    
+    bool isInitiator = descriptionType == DescriptionTypeAnswer;
+
     RefPtr<RTCPeerConnection> protectedThis(this);
     callOnMainThread([targetState, resolveCallback, protectedThis]() mutable {
         protectedThis->m_signalingState = targetState;
         resolveCallback();
     });
+
+    m_mediaEndpoint->prepareToSend(m_remoteConfiguration.get(), isInitiator);
 }
 
 RefPtr<RTCSessionDescription> RTCPeerConnection::remoteDescription() const
