@@ -268,6 +268,20 @@ void RTCPeerConnection::createOffer(const Dictionary& offerOptions, OfferAnswerR
         configurationSnapshot->addMediaDescription(WTF::move(mediaDescription));
     }
 
+
+    for (RefPtr<RTCDataChannel> dataChannel : m_dataChannels) {
+
+        RefPtr<PeerMediaDescription> mediaDescription = PeerMediaDescription::create();
+
+        mediaDescription->setType("application");
+        //mediaDescription->setMode("recvonly");
+        //mediaDescription->setRtcpMux(true);
+        //mediaDescription->setDtlsSetup("actpass");
+
+        configurationSnapshot->addMediaDescription(WTF::move(mediaDescription));
+    }
+
+
     RefPtr<RTCSessionDescription> offer = RTCSessionDescription::create("offer", MediaEndpointConfigurationConversions::toJSON(configurationSnapshot.get()));
     resolveCallback(WTF::move(offer));
 }
@@ -510,6 +524,7 @@ PassRefPtr<RTCDataChannel> RTCPeerConnection::createDataChannel(String label, co
         return nullptr;
     }
     PassRefPtr<RTCDataChannel> channel = RTCDataChannel::create(scriptExecutionContext(), m_mediaEndpoint.get(), label, options, ec);
+    m_dataChannels.append(channel.get());
     return channel;
 }
 

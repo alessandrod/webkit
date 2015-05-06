@@ -89,7 +89,7 @@ void MediaEndpointOwr::prepareToReceive(MediaEndpointConfiguration* configuratio
     Vector<SessionConfig> sessionConfigs;
     for (unsigned i = m_sessions.size(); i < configuration->mediaDescriptions().size(); ++i) {
         SessionConfig config;
-        config.type = configuration->mediaDescriptions()[i]->type() == "data" ?SessionTypeData :SessionTypeMedia;
+        config.type = configuration->mediaDescriptions()[i]->type() == "application" ?SessionTypeData :SessionTypeMedia;
         config.isDtlsClient = configuration->mediaDescriptions()[i]->dtlsSetup() == "active";
         sessionConfigs.append(WTF::move(config));
     }
@@ -98,7 +98,7 @@ void MediaEndpointOwr::prepareToReceive(MediaEndpointConfiguration* configuratio
 
     // Prepare the new sessions.
     for (unsigned i = m_numberOfReceivePreparedSessions; i < m_sessions.size(); ++i) {
-        if (configuration->mediaDescriptions()[i]->type() == "data") 
+        if (configuration->mediaDescriptions()[i]->type() == "application") 
             prepareDataSession(OWR_DATA_SESSION(m_sessions[i]), configuration->mediaDescriptions()[i].get());
         else
             prepareMediaSession(OWR_MEDIA_SESSION(m_sessions[i]), configuration->mediaDescriptions()[i].get(), isInitiator);
@@ -177,14 +177,11 @@ void MediaEndpointOwr::addRemoteCandidate(IceCandidate& candidate, unsigned mdes
 
 std::unique_ptr<RTCDataChannelHandler> MediaEndpointOwr::createDataChannel(const String& label, RTCDataChannelInit_Endpoint& initData)
 {   
-    OwrDataSession* session = owr_data_session_new(true);
     gchar* protocol_conversion = g_strdup(initData.protocol.ascii().data());
     gchar* label_conversion = g_strdup(label.ascii().data());
     //FIX ME : add maxRetransmitTime et maxRetransmits parameters in owr_data_channel_new
     OwrDataChannel* channel = owr_data_channel_new(initData.ordered, -1, 0, protocol_conversion, initData.negotiated, initData.id, label_conversion);
-    owr_data_session_add_data_channel(session, channel);
     
-    m_sessions.append(OWR_SESSION(session));
     std::unique_ptr<RTCDataChannelHandler> handler = RTCDataChannelHandler::create(label, initData.ordered, -1, 0, protocol_conversion, initData.negotiated, initData.id, channel);
 
     return handler;
@@ -424,10 +421,6 @@ static void gotIncomingSource(OwrMediaSession*, OwrMediaSource*, MediaEndpointOw
 static void dataChannelRequested(OwrDataSession* dataSession, bool ordered, int maxRetransmitTime, int maxRetransmits, const gchar *protocol, bool negotiated, int id, const gchar *label, MediaEndpointOwr* mediaEndpoint )
 {
     printf("-> dataChannelRequested\n");
-    OwrDataSession* newSession = owr_data_session_new(true);
-    //FIX ME : add maxRetransmitTime et maxRetransmits parameters in owr_data_channel_new
-    OwrDataChannel* newChannel = owr_data_channel_new(ordered, maxRetransmitTime, maxRetransmits, protocol, negotiated, id, label);
-    owr_data_session_add_data_channel(newSession, newChannel);
     
     RTCDataChannelInit_Endpoint initData;
 
