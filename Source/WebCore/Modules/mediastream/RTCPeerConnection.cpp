@@ -302,7 +302,26 @@ void RTCPeerConnection::createAnswer(const Dictionary& answerOptions, OfferAnswe
         return;
     }
 
+RefPtr<MediaEndpointConfiguration> localConfigurationSnapshot = m_localConfiguration ?
+        MediaEndpointConfigurationConversions::fromJSON(MediaEndpointConfigurationConversions::toJSON(m_localConfiguration.get())) : MediaEndpointConfiguration::create();
+
+    for (int i = 0; i < m_remoteConfiguration->mediaDescriptions.size(); ++i) {
+        RefPtr<PeerMediaDescription> localMediaDescription = m_localConfiguration->mediaDescriptions[i];
+        RefPtr<PeerMediaDescription> remoteMediaDescription = m_remoteConfiguration->mediaDescriptions[i];
+
+        if(!localMediaDescription){
+            localMediaDescription = PeerMediaDescription::create();
+
+            localMediaDescription->setType(remoteMediaDescription.type());
+            localMediaDescription->setDtlsSetup(remoteMediaDescription.dtlsSetup() ? "passive":"active");
+            localConfigurationSnapshot->addMediaDescription(WTF::move(localMediaDescription));
+        }   
+    }
+               
+
     // TODO
+        }
+        }
 }
 
 void RTCPeerConnection::setLocalDescription(RTCSessionDescription* description, VoidResolveCallback resolveCallback, RejectCallback rejectCallback, ExceptionCode& ec)
