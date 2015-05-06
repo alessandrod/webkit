@@ -268,7 +268,7 @@ void RTCPeerConnection::createOffer(const Dictionary& offerOptions, OfferAnswerR
         configurationSnapshot->addMediaDescription(WTF::move(mediaDescription));
     }
 
-
+    printf("RTCPeerConnection:createOffer Datachannel size %d \n",m_dataChannels.size());
     for (RefPtr<RTCDataChannel> dataChannel : m_dataChannels) {
 
         RefPtr<PeerMediaDescription> mediaDescription = PeerMediaDescription::create();
@@ -286,7 +286,7 @@ void RTCPeerConnection::createOffer(const Dictionary& offerOptions, OfferAnswerR
     resolveCallback(WTF::move(offer));
 }
 
-void RTCPeerConnection::createAnswer(const Dictionary& answerOptions, OfferAnswerResolveCallback, RejectCallback rejectCallback, ExceptionCode& ec)
+void RTCPeerConnection::createAnswer(const Dictionary& answerOptions, OfferAnswerResolveCallback resolveCallback, RejectCallback rejectCallback, ExceptionCode& ec)
 {
     if (m_signalingState == SignalingStateClosed) {
         ec = INVALID_STATE_ERR;
@@ -304,24 +304,35 @@ void RTCPeerConnection::createAnswer(const Dictionary& answerOptions, OfferAnswe
 
 RefPtr<MediaEndpointConfiguration> localConfigurationSnapshot = m_localConfiguration ?
         MediaEndpointConfigurationConversions::fromJSON(MediaEndpointConfigurationConversions::toJSON(m_localConfiguration.get())) : MediaEndpointConfiguration::create();
+        
+    for (int i = 0; i < m_remoteConfiguration->mediaDescriptions().size(); ++i) {
+        RefPtr<PeerMediaDescription> localMediaDescription;
+        
+        RefPtr<PeerMediaDescription> remoteMediaDescription = m_remoteConfiguration->mediaDescriptions()[i];
 
-    for (int i = 0; i < m_remoteConfiguration->mediaDescriptions.size(); ++i) {
-        RefPtr<PeerMediaDescription> localMediaDescription = m_localConfiguration->mediaDescriptions[i];
-        RefPtr<PeerMediaDescription> remoteMediaDescription = m_remoteConfiguration->mediaDescriptions[i];
-
-        if(!localMediaDescription){
+        if(!m_localConfiguration){
             localMediaDescription = PeerMediaDescription::create();
 
-            localMediaDescription->setType(remoteMediaDescription.type());
-            localMediaDescription->setDtlsSetup(remoteMediaDescription.dtlsSetup() ? "passive":"active");
+            localMediaDescription->setType(remoteMediaDescription->type());
+            localMediaDescription->setDtlsSetup(remoteMediaDescription->dtlsSetup() == "active" ? "passive":"active");
+        }   
+        else{
+            localMediaDescription = localConfigurationSnapshot->mediaDescriptions()[i];
+        }
+
+        if(localMediaDescription->type() == "application"){
+            localMediaDescription->setPort(remoteMediaDescription->port());
+        }   
+
+        localMediaDescription->setDtlsSetup(localMediaDescription->dtlsSetup() == "actpass" ? "passive":"actpass");
+        
+        if(!m_localConfiguration){
             localConfigurationSnapshot->addMediaDescription(WTF::move(localMediaDescription));
         }   
     }
-               
-
-    // TODO
-        }
-        }
+              
+    RefPtr<RTCSessionDescription> answer = RTCSessionDescription::create("answer", MediaEndpointConfigurationConversions::toJSON(localConfigurationSnapshot.get()));
+    resolveCallback(WTF::move(answer));
 }
 
 void RTCPeerConnection::setLocalDescription(RTCSessionDescription* description, VoidResolveCallback resolveCallback, RejectCallback rejectCallback, ExceptionCode& ec)

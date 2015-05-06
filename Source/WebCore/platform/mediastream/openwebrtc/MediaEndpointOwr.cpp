@@ -89,7 +89,8 @@ void MediaEndpointOwr::prepareToReceive(MediaEndpointConfiguration* configuratio
     Vector<SessionConfig> sessionConfigs;
     for (unsigned i = m_sessions.size(); i < configuration->mediaDescriptions().size(); ++i) {
         SessionConfig config;
-        config.type = configuration->mediaDescriptions()[i]->type() == "application" ?SessionTypeData :SessionTypeMedia;
+        config.type = configuration->mediaDescriptions()[i]->type() == "application" ? SessionTypeData :SessionTypeMedia;
+
         config.isDtlsClient = configuration->mediaDescriptions()[i]->dtlsSetup() == "active";
         sessionConfigs.append(WTF::move(config));
     }
@@ -113,7 +114,7 @@ void MediaEndpointOwr::prepareToSend(MediaEndpointConfiguration* configuration, 
     Vector<SessionConfig> sessionConfigs;
     for (unsigned i = m_sessions.size(); i < configuration->mediaDescriptions().size(); ++i) {
         SessionConfig config;
-        config.type = SessionTypeMedia;
+        config.type = configuration->mediaDescriptions()[i]->type() == "application" ? SessionTypeData :SessionTypeMedia;
         config.isDtlsClient = configuration->mediaDescriptions()[i]->dtlsSetup() != "active";
         sessionConfigs.append(WTF::move(config));
     }
@@ -133,6 +134,12 @@ void MediaEndpointOwr::prepareToSend(MediaEndpointConfiguration* configuration, 
         if (mdesc.iceCandidates().size()) {
             for (auto& candidate : mdesc.iceCandidates())
                 internalAddRemoteCandidate(session, *candidate, mdesc.iceUfrag(), mdesc.icePassword());
+        }
+
+        if (mdesc.type() == "application") {
+            g_object_set(session, "sctp-remote-port", 5000, nullptr);
+            m_numberOfSendPreparedSessions = i + 1;
+            continue;
         }
 
         if (i < m_numberOfSendPreparedSessions)
@@ -289,10 +296,14 @@ void MediaEndpointOwr::ensureTransportAgentAndSessions(bool isInitiator, const V
     }
 
     g_object_set(m_transportAgent, "ice-controlling-mode", isInitiator, nullptr);
-
+    
     for (auto& config : sessionConfigs) {
-        if (config.type == SessionTypeMedia) 
-	    m_sessions.append(OWR_SESSION(owr_media_session_new(config.isDtlsClient)));
+        printf("MediaEndpointOwr::ensure type MEDIA %i \n", config.type);
+        if (config.type == SessionTypeMedia){
+           m_sessions.append(OWR_SESSION(owr_media_session_new(config.isDtlsClient)));
+             
+        } 
+	    
 	else
 	    m_sessions.append(OWR_SESSION(owr_data_session_new(config.isDtlsClient)));   
     }
