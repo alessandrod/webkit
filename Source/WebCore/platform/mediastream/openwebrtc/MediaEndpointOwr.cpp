@@ -87,32 +87,27 @@ void MediaEndpointOwr::setConfiguration(RefPtr<MediaEndpointInit>&& configuratio
 void MediaEndpointOwr::prepareToReceive(MediaEndpointConfiguration* configuration, bool isInitiator)
 {
     Vector<SessionConfig> sessionConfigs;
-    printf("m_sessions.size() = %i\n", m_sessions.size());
-    printf("configuration->mediaDescriptions().size() = %i\n", configuration->mediaDescriptions().size());
+
     for (unsigned i = m_sessions.size(); i < configuration->mediaDescriptions().size(); ++i) {
-    printf("-> here1\n");
         SessionConfig config;
         config.type = configuration->mediaDescriptions()[i]->type() == "application" ? SessionTypeData :SessionTypeMedia;
 
         config.isDtlsClient = configuration->mediaDescriptions()[i]->dtlsSetup() == "active";
         sessionConfigs.append(WTF::move(config));
     }
-    printf("-> here2\n");
+
     ensureTransportAgentAndSessions(isInitiator, sessionConfigs);
-    printf("-> here3\n");
+
     // Prepare the new sessions.
     for (unsigned i = m_numberOfReceivePreparedSessions; i < m_sessions.size(); ++i) {
-    printf("-> here4\n");
         if (configuration->mediaDescriptions()[i]->type() == "application") {
-    printf("-> here7\n");
             prepareDataSession(OWR_DATA_SESSION(m_sessions[i]), configuration->mediaDescriptions()[i].get());
         }else
             prepareMediaSession(OWR_MEDIA_SESSION(m_sessions[i]), configuration->mediaDescriptions()[i].get(), isInitiator);
 
-        printf("-> here5\n");
         owr_transport_agent_add_session(m_transportAgent, m_sessions[i]);
     }
-    printf("-> here6\n");
+
     m_numberOfReceivePreparedSessions = m_sessions.size();
 }
 
@@ -147,7 +142,8 @@ void MediaEndpointOwr::prepareToSend(MediaEndpointConfiguration* configuration, 
             //FIXME: need to handle more than one datachannels
             if(m_dataChannels.size() != 0)
                 owr_data_session_add_data_channel(OWR_DATA_SESSION(session), m_dataChannels[0]);
-            g_object_set(session, "sctp-remote-port", mdesc.port(), nullptr);
+
+            g_object_set(session, "sctp-remote-port", 5000, nullptr);
             m_numberOfSendPreparedSessions = i + 1;
             continue;
         }
@@ -286,10 +282,10 @@ void MediaEndpointOwr::prepareMediaSession(OwrMediaSession* mediaSession, PeerMe
 void MediaEndpointOwr::prepareDataSession(OwrDataSession* dataSession, PeerMediaDescription* mediaDescription)
 {
     prepareSession(OWR_SESSION(dataSession), mediaDescription);
-   printf("-> prepareDataSession1\n");
-    g_object_set(dataSession, "sctp-local-port", mediaDescription->port(), nullptr);
+
+    g_object_set(dataSession, "sctp-local-port", 5000, nullptr);
     g_signal_connect(dataSession, "on-data-channel-requested", G_CALLBACK(dataChannelRequested), this);
-     printf("-> prepareDataSession2\n");
+
 }
 
 void MediaEndpointOwr::ensureTransportAgentAndSessions(bool isInitiator, const Vector<SessionConfig>& sessionConfigs)
@@ -309,11 +305,8 @@ void MediaEndpointOwr::ensureTransportAgentAndSessions(bool isInitiator, const V
     for (auto& config : sessionConfigs) {
         printf("MediaEndpointOwr::ensureTransportAgentAndSessions %i \n", config.type);
         if (config.type == SessionTypeMedia){
-           m_sessions.append(OWR_SESSION(owr_media_session_new(config.isDtlsClient)));
-             
-        } 
-	    
-	else
+           m_sessions.append(OWR_SESSION(owr_media_session_new(config.isDtlsClient)));    
+        } else
 	    m_sessions.append(OWR_SESSION(owr_data_session_new(config.isDtlsClient)));   
     }
 }
@@ -321,7 +314,7 @@ void MediaEndpointOwr::ensureTransportAgentAndSessions(bool isInitiator, const V
 void MediaEndpointOwr::internalAddRemoteCandidate(OwrSession* session, IceCandidate& candidate, const String& ufrag, const String& password)
 {
     gboolean rtcpMux;
-    g_object_get(session, "rtcp-mux", &rtcpMux, nullptr);
+    //g_object_get(session, "rtcp-mux", &rtcpMux, nullptr);
 
     if (rtcpMux && candidate.componentId() == OWR_COMPONENT_TYPE_RTCP)
         //return;
@@ -344,7 +337,7 @@ void MediaEndpointOwr::internalAddRemoteCandidate(OwrSession* session, IceCandid
         "ufrag", ufrag.ascii().data(),
         "password", password.ascii().data(),
         nullptr);
-    printf("owr_session_add_remote_candidate\n");
+    printf("internalAddRemoteCandidate::owr_session_add_remote_candidate\n");
     owr_session_add_remote_candidate(session, owrCandidate);
 }
 

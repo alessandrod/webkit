@@ -366,10 +366,9 @@ void RTCPeerConnection::setLocalDescription(RTCSessionDescription* description, 
         protectedThis->m_signalingState = targetState;
         resolveCallback();
     };
-    printf("-> setLocalDescription::hasNewMediaDescriptions = %d \n", hasNewMediaDescriptions);
+
     if (hasNewMediaDescriptions) {
         printf("-> setLocalDescription::prepareToReceive()\n");
-        printf("-> setLocalDescription::localconfigsize = %i\n", m_localConfiguration->mediaDescriptions().size());
         m_mediaEndpoint->prepareToReceive(m_localConfiguration.get(), isInitiator);
     }
         
@@ -390,6 +389,7 @@ RefPtr<RTCSessionDescription> RTCPeerConnection::localDescription() const
 
 void RTCPeerConnection::setRemoteDescription(RTCSessionDescription* description, VoidResolveCallback resolveCallback, RejectCallback rejectCallback, ExceptionCode& ec)
 {
+    printf("-> start setRemoteDescription\n");
     if (m_signalingState == SignalingStateClosed) {
         ec = INVALID_STATE_ERR;
         return;
@@ -417,7 +417,7 @@ void RTCPeerConnection::setRemoteDescription(RTCSessionDescription* description,
         protectedThis->m_signalingState = targetState;
         resolveCallback();
     });
-
+    printf("-> setRemoteDescription::prepareToSend()\n");
     m_mediaEndpoint->prepareToSend(m_remoteConfiguration.get(), isInitiator);
 }
 
