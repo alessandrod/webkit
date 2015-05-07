@@ -337,25 +337,24 @@ RefPtr<MediaEndpointConfiguration> localConfigurationSnapshot = m_localConfigura
 
 void RTCPeerConnection::setLocalDescription(RTCSessionDescription* description, VoidResolveCallback resolveCallback, RejectCallback rejectCallback, ExceptionCode& ec)
 {
+    printf("-> start setLocalDescription\n");
     if (m_signalingState == SignalingStateClosed) {
         ec = INVALID_STATE_ERR;
         return;
     }
 
     DescriptionType descriptionType = parseDescriptionType(description->type());
-
     SignalingState targetState = targetSignalingState(SetterTypeLocal, descriptionType);
-    if (targetState == SignalingStateInvalid) {
+    /*if (targetState == SignalingStateInvalid) {
         callOnMainThread([rejectCallback] {
             // FIXME: Error type?
             RefPtr<DOMError> error = DOMError::create("InvalidSessionDescriptionError");
             rejectCallback(error.get());
         });
         return;
-    }
-
-    unsigned previousNumberOfMediaDescriptions = m_localConfiguration ? m_localConfiguration->mediaDescriptions().size() : 0;
-
+    }*///not pass here
+    unsigned previousNumberOfMediaDescriptions = m_localConfiguration != NULL ? m_localConfiguration->mediaDescriptions().size() : 0;
+    printf("-> set m_localConfiguration\n");
     m_localConfiguration = MediaEndpointConfigurationConversions::fromJSON(description->sdp());
     m_localConfigurationType = description->type();
 
@@ -367,12 +366,18 @@ void RTCPeerConnection::setLocalDescription(RTCSessionDescription* description, 
         protectedThis->m_signalingState = targetState;
         resolveCallback();
     };
-
-    if (hasNewMediaDescriptions)
+    printf("-> setLocalDescription::hasNewMediaDescriptions = %d \n", hasNewMediaDescriptions);
+    if (hasNewMediaDescriptions) {
+        printf("-> setLocalDescription::prepareToReceive()\n");
+        printf("-> setLocalDescription::localconfigsize = %i\n", m_localConfiguration->mediaDescriptions().size());
         m_mediaEndpoint->prepareToReceive(m_localConfiguration.get(), isInitiator);
+    }
+        
 
-    if (m_remoteConfiguration)
+    if (m_remoteConfiguration != NULL) {
+        printf("-> setLocalDescription::prepareToSend()\n");
         m_mediaEndpoint->prepareToSend(m_remoteConfiguration.get(), isInitiator);
+    }       
 }
 
 RefPtr<RTCSessionDescription> RTCPeerConnection::localDescription() const
@@ -393,16 +398,16 @@ void RTCPeerConnection::setRemoteDescription(RTCSessionDescription* description,
     DescriptionType descriptionType = parseDescriptionType(description->type());
 
     SignalingState targetState = targetSignalingState(SetterTypeRemote, descriptionType);
-    if (targetState == SignalingStateInvalid) {
+    /*if (targetState == SignalingStateInvalid) {
         callOnMainThread([rejectCallback] {
             // FIXME: Error type?
             RefPtr<DOMError> error = DOMError::create("InvalidSessionDescriptionError");
             rejectCallback(error.get());
         });
         return;
-    }
-
+    }*/
     m_remoteConfiguration = MediaEndpointConfigurationConversions::fromJSON(description->sdp());
+    printf("-> set m_remoteConfiguration: %i\n", m_remoteConfiguration->mediaDescriptions().size());
     m_remoteConfigurationType = description->type();
     
     bool isInitiator = descriptionType == DescriptionTypeAnswer;
