@@ -292,11 +292,14 @@ void MediaEndpointOwr::ensureTransportAgentAndSessions(bool isInitiator, const V
 {
     if (!m_transportAgent) {
         m_transportAgent = owr_transport_agent_new(false);
-
+        owr_transport_agent_set_local_port_range(m_transportAgent, 5000, 5999);
+        owr_transport_agent_add_local_address(m_transportAgent, "127.0.0.1");
+        
         for (auto& server : m_configuration->iceServers()) {
             // FIXME: parse url type and port
             owr_transport_agent_add_helper_server(m_transportAgent, OWR_HELPER_SERVER_TYPE_STUN,
                 server->urls()[0].ascii().data(), 3478, nullptr, nullptr);
+            
         }
     }
 
