@@ -138,18 +138,21 @@ void MediaEndpointOwr::prepareToSend(MediaEndpointConfiguration* configuration, 
                 internalAddRemoteCandidate(session, *candidate, mdesc.iceUfrag(), mdesc.icePassword());
         }
 
+        if (i < m_numberOfSendPreparedSessions)
+            continue;
+
         if (mdesc.type() == "application") {
             //FIXME: need to handle more than one datachannels
-            if(m_dataChannels.size() != 0)
+            if(m_dataChannels.size() != 0) {
                 owr_data_session_add_data_channel(OWR_DATA_SESSION(session), m_dataChannels[0]);
-
+                printf("data channel added in session %i\n", isInitiator);
+            }
+               
+            printf("set remote port 5000 %i\n", isInitiator);
             g_object_set(session, "sctp-remote-port", 5000, nullptr);
             m_numberOfSendPreparedSessions = i + 1;
             continue;
         }
-
-        if (i < m_numberOfSendPreparedSessions)
-            continue;
 
         if (!mdesc.source())
             continue;
@@ -283,6 +286,7 @@ void MediaEndpointOwr::prepareDataSession(OwrDataSession* dataSession, PeerMedia
 {
     prepareSession(OWR_SESSION(dataSession), mediaDescription);
 
+    printf("set local port 5000\n");
     g_object_set(dataSession, "sctp-local-port", 5000, nullptr);
     g_signal_connect(dataSession, "on-data-channel-requested", G_CALLBACK(dataChannelRequested), this);
 
@@ -292,25 +296,22 @@ void MediaEndpointOwr::ensureTransportAgentAndSessions(bool isInitiator, const V
 {
     if (!m_transportAgent) {
         m_transportAgent = owr_transport_agent_new(false);
-        owr_transport_agent_set_local_port_range(m_transportAgent, 5000, 5999);
-        owr_transport_agent_add_local_address(m_transportAgent, "127.0.0.1");
-        
+        printf("ensureTransportAgentAndSessions create transport %i\n", isInitiator);
         for (auto& server : m_configuration->iceServers()) {
             // FIXME: parse url type and port
-            owr_transport_agent_add_helper_server(m_transportAgent, OWR_HELPER_SERVER_TYPE_STUN,
-                server->urls()[0].ascii().data(), 3478, nullptr, nullptr);
-            
+            //owr_transport_agent_add_helper_server(m_transportAgent, OWR_HELPER_SERVER_TYPE_STUN,
+                //server->urls()[0].ascii().data(), 3478, nullptr, nullptr);
         }
     }
 
     g_object_set(m_transportAgent, "ice-controlling-mode", isInitiator, nullptr);
     
     for (auto& config : sessionConfigs) {
-        printf("MediaEndpointOwr::ensureTransportAgentAndSessions %i \n", config.type);
+        printf("ensureTransportAgentAndSessions create session %i\n", isInitiator);
         if (config.type == SessionTypeMedia){
-           m_sessions.append(OWR_SESSION(owr_media_session_new(config.isDtlsClient)));    
+            m_sessions.append(OWR_SESSION(owr_media_session_new(config.isDtlsClient)));    
         } else
-	    m_sessions.append(OWR_SESSION(owr_data_session_new(config.isDtlsClient)));   
+	        m_sessions.append(OWR_SESSION(owr_data_session_new(config.isDtlsClient)));   
     }
 }
 

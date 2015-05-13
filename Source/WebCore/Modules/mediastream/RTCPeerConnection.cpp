@@ -407,7 +407,7 @@ void RTCPeerConnection::setRemoteDescription(RTCSessionDescription* description,
         return;
     }*/
     m_remoteConfiguration = MediaEndpointConfigurationConversions::fromJSON(description->sdp());
-    printf("-> set m_remoteConfiguration: %i\n", m_remoteConfiguration->mediaDescriptions().size());
+    printf("-> set m_remoteConfiguration\n");
     m_remoteConfigurationType = description->type();
     
     bool isInitiator = descriptionType == DescriptionTypeAnswer;
