@@ -321,6 +321,23 @@ static  RefPtr<InspectorObject> createRegexps()
 static  RefPtr<InspectorObject> createTemplates()
 {
     RefPtr<InspectorObject> templates = InspectorObject::create();
+    templates->setString(ASCIILiteral("sdp"), "v=${version}\r\no=${username} ${sessionId} ${sessionVersion} ${netType} ${addressType} ${address}\r\ns=${sessionName}\r\nt=${startTime} ${stopTime}\r\n ${msidsemanticLine}");
+    templates->setString(ASCIILiteral("msidsemantic"), "a=msid-semantic:WMS ${mediaStreamIds}\r\n");
+    templates->setString(ASCIILiteral("mblock"),  "m=${type} ${port} ${protocol} ${fmt}\r\nc=${netType} ${addressType} ${address}\r\n${rtcpLine}${rtcpMuxLine}a=${mode}\r\n${rtpMapLines}${fmtpLines}${nackLines}${nackpliLines}${ccmfirLines}${cnameLines}${msidLines}${iceCredentialLines}${candidateLines}${dtlsFingerprintLine}${dtlsSetupLine}${sctpmapLine}");
+    templates->setString(ASCIILiteral("rtcp"), "a=rtcp:${port}${[ ]netType}${[ ]addressType}${[ ]address}\r\n");
+    templates->setString(ASCIILiteral("rtcpMux"), "a=rtcp-mux\r\n");
+    templates->setString(ASCIILiteral("rtpMap"), "a=rtpmap:${type} ${encodingName}/${clockRate}${[/]channels}\r\n");
+    templates->setString(ASCIILiteral("fmtp"), "a=fmtp:${type} ${parameters}\r\n");
+    templates->setString(ASCIILiteral("nack"), "a=rtcp-fb:${type} nack\r\n");
+    templates->setString(ASCIILiteral("nackpli"), "a=rtcp-fb:${type} ccm fir\r\n");
+    templates->setString(ASCIILiteral("ccmfir"), "a=rtcp-fb:${type} nack pli\r\n");
+    templates->setString(ASCIILiteral("cname"), "a=ssrc:${ssrc} cname:${cname}\r\n");
+    templates->setString(ASCIILiteral("msid"), "a=${[ssrc:]ssrc[ ]}msid:${mediaStreamId} ${mediaStreamTrackId}\r\n");
+    templates->setString(ASCIILiteral("iceCredentials"), "a=ice-ufrag:${ufrag}\r\na=ice-pwd:${password}\r\n");
+    templates->setString(ASCIILiteral("candidate"), "a=candidate:${foundation} ${componentId} ${transport} ${priority} ${address} ${port} typ ${type}${[ raddr ]relatedAddress}${[ rport ]relatedPort}${[ tcptype ]tcpType}\r\n");
+    templates->setString(ASCIILiteral("dtlsFingerprint"), "a=fingerprint:${fingerprintHashFunction} ${fingerprint}\r\n");
+    templates->setString(ASCIILiteral("dtlsSetup"), "a=setup:${setup}\r\n");
+    templates->setString(ASCIILiteral("sctpmap"), "a=sctpmap:${port} ${app}${[ ]streams}\r\n");
 
     return templates;
 }
