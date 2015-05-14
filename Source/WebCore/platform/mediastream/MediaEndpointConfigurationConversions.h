@@ -42,6 +42,9 @@ namespace MediaEndpointConfigurationConversions {
 RefPtr<MediaEndpointConfiguration> fromJSON(const String&);
 String toJSON(MediaEndpointConfiguration*);
 
+RefPtr<MediaEndpointConfiguration> fromSDP();
+String toSDP(MediaEndpointConfiguration*);
+
 RefPtr<IceCandidate> iceCandidateFromJSON(const String&);
 String iceCandidateToJSON(IceCandidate*);
 

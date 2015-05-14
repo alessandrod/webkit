@@ -310,6 +310,22 @@ String iceCandidateToJSON(IceCandidate* candidate)
     return createCandidateObject(candidate)->toJSONString();
 }
 
+RefPtr<MediaEndpointConfiguration> fromSDP()
+{
+}
+
+String toSDP(MediaEndpointConfiguration* configuration)
+{
+}
+
+String fillTemplate()
+{
+}
+
+void addDefaults()
+{
+}
+
 }
 
 } // namespace WebCore
