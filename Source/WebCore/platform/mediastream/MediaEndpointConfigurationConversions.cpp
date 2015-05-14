@@ -310,19 +310,35 @@ String iceCandidateToJSON(IceCandidate* candidate)
     return createCandidateObject(candidate)->toJSONString();
 }
 
+
+static  RefPtr<InspectorObject> createRegexps()
+{
+    RefPtr<InspectorObject> regexps = InspectorObject::create();
+
+    return regexps;
+}
+
+static  RefPtr<InspectorObject> createTemplates()
+{
+    RefPtr<InspectorObject> templates = InspectorObject::create();
+
+    return templates;
+}
+
 RefPtr<MediaEndpointConfiguration> fromSDP()
 {
 }
 
 String toSDP(MediaEndpointConfiguration* configuration)
 {
+
 }
 
-String fillTemplate()
+static String fillTemplate()
 {
 }
 
-void addDefaults()
+static void addDefaults()
 {
 }
 
