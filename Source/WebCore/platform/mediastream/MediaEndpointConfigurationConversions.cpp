@@ -369,6 +369,9 @@ static  RefPtr<InspectorObject> createTemplates()
 
 RefPtr<MediaEndpointConfiguration> fromSDP()
 {
+
+
+
 }
 
 String toSDP(MediaEndpointConfiguration* configuration)
@@ -380,8 +383,20 @@ static String fillTemplate()
 {
 }
 
-static void addDefaults()
+static void addDefaults(RefPtr<InspectorObject> obj, RefPtr<InspectorObject> defaults)
 {
+
+    InspectorObject::iterator i_defaults = defaults->begin();
+
+    for (unsigned i = 0; i < obj->size(); ++i) {
+        InspectorObject::iterator i_obj = obj->find(i_defaults->key);
+        
+        if(!i_obj->value){
+            obj->setValue(i_defaults->key, WTF::move(i_defaults->value));            
+        }
+
+    }
+    
 }
 
 }
